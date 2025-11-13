@@ -3,7 +3,7 @@
   "author": "Grupo Smart Home",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -254.6, "attrs": {} },
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -24.2, "attrs": {} },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr5",
@@ -22,21 +22,29 @@
       "type": "wokwi-dht22",
       "id": "dht5",
       "top": 422.7,
-      "left": -91.8,
-      "attrs": { "temperature": "24.1" }
+      "left": 244.2,
+      "attrs": { "temperature": "23.9" }
+    },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir5", "top": 263.2, "left": -16.98, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "ledAlarm1",
+      "top": 188.4,
+      "left": 13.4,
+      "attrs": { "color": "red" }
     },
     {
       "type": "wokwi-led",
       "id": "ledThermo1",
-      "top": 351.6,
-      "left": -82.6,
+      "top": 342,
+      "left": 243.8,
       "attrs": { "color": "blue" }
     },
     {
       "type": "wokwi-text",
       "id": "text1",
-      "top": 393.6,
-      "left": -86.4,
+      "top": 403.2,
+      "left": 249.6,
       "attrs": { "text": "Temp" }
     },
     {
@@ -45,10 +53,17 @@
       "top": 470.4,
       "left": -460.8,
       "attrs": { "text": "Luxometro" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text3",
+      "top": 240,
+      "left": -9.6,
+      "attrs": { "text": "Movimiento" }
     }
   ],
   "connections": [
-    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h220.8", "v-48" ] ],
+    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h393.6", "v-48" ] ],
     [ "ldr5:GND", "esp1:GND.2", "black", [ "h28.8", "v-0.4" ] ],
     [ "ledLight5:A", "esp1:D12", "green", [ "v0" ] ],
     [ "ledLight5:C", "esp1:GND.2", "black", [ "v0" ] ],
@@ -56,8 +71,13 @@
     [ "dht5:VCC", "esp1:3V3", "red", [ "v0" ] ],
     [ "dht5:GND", "esp1:GND.1", "black", [ "v0" ] ],
     [ "dht5:SDA", "esp1:D2", "green", [ "v0" ] ],
+    [ "pir5:VCC", "esp1:VIN", "red", [ "v19.2", "h-105.6", "v211.2" ] ],
+    [ "pir5:GND", "esp1:GND.2", "black", [ "v19.2", "h-105.86", "v201.6" ] ],
+    [ "esp1:D19", "pir5:OUT", "green", [ "h28.5", "v-115.3", "h-76.8" ] ],
     [ "ledThermo1:C", "esp1:GND.1", "black", [ "v9.6", "h-105.2", "v182.5" ] ],
-    [ "ledThermo1:A", "esp1:D27", "green", [ "v19.2", "h-230.4", "v125.1" ] ]
+    [ "ledThermo1:A", "esp1:D27", "green", [ "v19.2", "h-326.4", "v134.7" ] ],
+    [ "esp1:D25", "ledAlarm1:A", "green", [ "h-9.6", "v-278.4", "h67.2" ] ],
+    [ "ledAlarm1:C", "esp1:GND.2", "black", [ "v0", "h-66.8", "v326.4" ] ]
   ],
   "dependencies": {}
 }

@@ -3,7 +3,7 @@
   "author": "Grupo Smart Home",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -235.4, "attrs": {} },
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -254.6, "attrs": {} },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr5",
@@ -19,6 +19,27 @@
       "attrs": { "color": "yellow" }
     },
     {
+      "type": "wokwi-dht22",
+      "id": "dht5",
+      "top": 422.7,
+      "left": -91.8,
+      "attrs": { "temperature": "24.1" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledThermo1",
+      "top": 351.6,
+      "left": -82.6,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text1",
+      "top": 393.6,
+      "left": -86.4,
+      "attrs": { "text": "Temp" }
+    },
+    {
       "type": "wokwi-text",
       "id": "text2",
       "top": 470.4,
@@ -27,11 +48,16 @@
     }
   ],
   "connections": [
-    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h182.4", "v-48" ] ],
+    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h220.8", "v-48" ] ],
     [ "ldr5:GND", "esp1:GND.2", "black", [ "h28.8", "v-0.4" ] ],
     [ "ledLight5:A", "esp1:D12", "green", [ "v0" ] ],
     [ "ledLight5:C", "esp1:GND.2", "black", [ "v0" ] ],
-    [ "ldr5:DO", "esp1:D32", "green", [ "h57.6", "v-29.3" ] ]
+    [ "ldr5:DO", "esp1:D32", "green", [ "h57.6", "v-29.3" ] ],
+    [ "dht5:VCC", "esp1:3V3", "red", [ "v0" ] ],
+    [ "dht5:GND", "esp1:GND.1", "black", [ "v0" ] ],
+    [ "dht5:SDA", "esp1:D2", "green", [ "v0" ] ],
+    [ "ledThermo1:C", "esp1:GND.1", "black", [ "v9.6", "h-105.2", "v182.5" ] ],
+    [ "ledThermo1:A", "esp1:D27", "green", [ "v19.2", "h-230.4", "v125.1" ] ]
   ],
   "dependencies": {}
 }

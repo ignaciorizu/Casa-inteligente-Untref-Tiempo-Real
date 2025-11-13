@@ -5,6 +5,20 @@
   "parts": [
     { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -24.2, "attrs": {} },
     {
+      "type": "wokwi-led",
+      "id": "ledLight4",
+      "top": 390,
+      "left": -562.6,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr4",
+      "top": 396.8,
+      "left": -508,
+      "attrs": {}
+    },
+    {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr5",
       "top": 492.8,
@@ -23,7 +37,7 @@
       "id": "dht5",
       "top": 422.7,
       "left": 244.2,
-      "attrs": { "temperature": "23.9" }
+      "attrs": { "temperature": "24.1" }
     },
     { "type": "wokwi-pir-motion-sensor", "id": "pir5", "top": 263.2, "left": -16.98, "attrs": {} },
     {
@@ -50,8 +64,8 @@
     {
       "type": "wokwi-text",
       "id": "text2",
-      "top": 470.4,
-      "left": -460.8,
+      "top": 364.8,
+      "left": -470.4,
       "attrs": { "text": "Luxometro" }
     },
     {
@@ -60,12 +74,22 @@
       "top": 240,
       "left": -9.6,
       "attrs": { "text": "Movimiento" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 79.2,
+      "left": -17.4,
+      "attrs": { "volume": "0.1" }
     }
   ],
   "connections": [
+    [ "ldr4:VCC", "esp1:3V3", "red", [ "h38.4", "v220.8", "h393.6", "v-48" ] ],
     [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h393.6", "v-48" ] ],
     [ "ldr5:GND", "esp1:GND.2", "black", [ "h28.8", "v-0.4" ] ],
+    [ "ldr4:GND", "esp1:GND.2", "black", [ "h28.8", "v153.2" ] ],
     [ "ledLight5:A", "esp1:D12", "green", [ "v0" ] ],
+    [ "ledLight4:C", "esp1:GND.2", "black", [ "v38.4", "h240.4", "v105.6" ] ],
     [ "ledLight5:C", "esp1:GND.2", "black", [ "v0" ] ],
     [ "ldr5:DO", "esp1:D32", "green", [ "h57.6", "v-29.3" ] ],
     [ "dht5:VCC", "esp1:3V3", "red", [ "v0" ] ],
@@ -77,7 +101,11 @@
     [ "ledThermo1:C", "esp1:GND.1", "black", [ "v9.6", "h-105.2", "v182.5" ] ],
     [ "ledThermo1:A", "esp1:D27", "green", [ "v19.2", "h-326.4", "v134.7" ] ],
     [ "esp1:D25", "ledAlarm1:A", "green", [ "h-9.6", "v-278.4", "h67.2" ] ],
-    [ "ledAlarm1:C", "esp1:GND.2", "black", [ "v0", "h-66.8", "v326.4" ] ]
+    [ "ledAlarm1:C", "esp1:GND.2", "black", [ "v0", "h-66.8", "v326.4" ] ],
+    [ "esp1:D35", "ldr4:DO", "green", [ "h-259.2", "v-0.4" ] ],
+    [ "esp1:D14", "ledLight4:A", "green", [ "h-268.8", "v-86.3", "h-249.6" ] ],
+    [ "bz1:1", "esp1:GND.2", "black", [ "v9.6", "h-48", "v403.2" ] ],
+    [ "bz1:2", "esp1:D26", "green", [ "v48", "h-67.6", "v316.8" ] ]
   ],
   "dependencies": {}
 }

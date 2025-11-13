@@ -5,11 +5,16 @@
 #include <freertos/queue.h>
 
 // ----- CONFIG ----- //
+
+#define CANT_HABITACIONES 3  
+
 #define LDR_PIN_ENTRADA 32     // Sensor de Luz - Entrada
 #define LDR_PIN_PASILLO 35     // Sensor de Luz - Pasillo
+#define LDR_PIN_SALA 33        // Sensor de Luz - Sala
 
 #define LED_LIGHT_ENTRADA 12   // Iluminación - Entrada
 #define LED_LIGHT_PASILLO 14   // Iluminación - Pasillo
+#define LED_LIGHT_SALA 13      // Iluminación - Sala
 
 #define DHTPIN 2        // Sensor de Temperatura
 #define PIR_PIN 19      // Sensor de Movimiento
@@ -36,8 +41,10 @@ void setup() {
 
   pinMode(LDR_PIN_ENTRADA, INPUT);
   pinMode(LDR_PIN_PASILLO, INPUT);
+  pinMode(LDR_PIN_SALA, INPUT);
   pinMode(LED_LIGHT_ENTRADA, OUTPUT);
   pinMode(LED_LIGHT_PASILLO, OUTPUT);
+  pinMode(LED_LIGHT_SALA, OUTPUT);
   
   pinMode(PIR_PIN, INPUT);
   pinMode(LED_THERM, OUTPUT);
@@ -72,11 +79,11 @@ void TaskTemp(void *pv) {
 }
 
 void TaskLight(void *pv) {
-  const int ldrPins[2] = {LDR_PIN_ENTRADA, LDR_PIN_PASILLO};
-  const int ledPins[2] = {LED_LIGHT_ENTRADA, LED_LIGHT_PASILLO};
+  const int ldrPins[CANT_HABITACIONES] = {LDR_PIN_ENTRADA, LDR_PIN_PASILLO, LDR_PIN_SALA};
+  const int ledPins[CANT_HABITACIONES] = {LED_LIGHT_ENTRADA, LED_LIGHT_PASILLO, LED_LIGHT_SALA};
 
   while (1) {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < CANT_HABITACIONES; i++) {
       int light = digitalRead(ldrPins[i]);
       digitalWrite(ledPins[i], light);
     }
@@ -117,4 +124,3 @@ void TaskAlarm(void *pv) {
     }
   }
 }
-

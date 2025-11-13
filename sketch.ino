@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "SensorLuz.h"
 #include <DHT.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -38,13 +39,6 @@ void TaskAlarm(void *pv);
 
 void setup() {
   Serial.begin(115200);
-
-  pinMode(LDR_PIN_ENTRADA, INPUT);
-  pinMode(LDR_PIN_PASILLO, INPUT);
-  pinMode(LDR_PIN_SALA, INPUT);
-  pinMode(LED_LIGHT_ENTRADA, OUTPUT);
-  pinMode(LED_LIGHT_PASILLO, OUTPUT);
-  pinMode(LED_LIGHT_SALA, OUTPUT);
   
   pinMode(PIR_PIN, INPUT);
   pinMode(LED_THERM, OUTPUT);
@@ -79,17 +73,20 @@ void TaskTemp(void *pv) {
 }
 
 void TaskLight(void *pv) {
-  const int ldrPins[CANT_HABITACIONES] = {LDR_PIN_ENTRADA, LDR_PIN_PASILLO, LDR_PIN_SALA};
-  const int ledPins[CANT_HABITACIONES] = {LED_LIGHT_ENTRADA, LED_LIGHT_PASILLO, LED_LIGHT_SALA};
+  SensorLuz luces[CANT_HABITACIONES]= {
+     SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
+     SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
+     SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
+  };
 
   while (1) {
-    for (int i = 0; i < CANT_HABITACIONES; i++) {
-      int light = digitalRead(ldrPins[i]);
-      digitalWrite(ledPins[i], light);
-    }
+    for (auto &l : luces) {
+      l.actualizar();
+    } 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
+
 
 void TaskMotion(void *pv) {
   while (1) {

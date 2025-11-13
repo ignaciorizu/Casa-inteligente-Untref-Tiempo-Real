@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "author": "Grupo Smart Home",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp1", "top": 427.1, "left": -235.4, "attrs": {} },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr5",
+      "top": 492.8,
+      "left": -508,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledLight5",
+      "top": 486,
+      "left": -562.6,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text2",
+      "top": 470.4,
+      "left": -460.8,
+      "attrs": { "text": "Luxometro" }
+    }
+  ],
+  "connections": [
+    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h182.4", "v-48" ] ],
+    [ "ldr5:GND", "esp1:GND.2", "black", [ "h28.8", "v-0.4" ] ],
+    [ "ledLight5:A", "esp1:D12", "green", [ "v0" ] ],
+    [ "ledLight5:C", "esp1:GND.2", "black", [ "v0" ] ],
+    [ "ldr5:DO", "esp1:D32", "green", [ "h57.6", "v-29.3" ] ]
+  ],
+  "dependencies": {}
+}

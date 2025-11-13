@@ -11,6 +11,7 @@
 #define LED_THERM 27   // termostato
 #define PIR_PIN 19     // movimiento --
 #define LED_ALARM 25   // alarma / sirena --
+#define SPEAKER_PIN 26  // sonido de alarma
 
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
@@ -34,6 +35,7 @@ void setup() {
   pinMode(LED_LIGHT, OUTPUT);
   pinMode(LED_THERM, OUTPUT);
   pinMode(LED_ALARM, OUTPUT);
+  pinMode(SPEAKER_PIN, OUTPUT);
 
   dht.begin();
 
@@ -96,6 +98,8 @@ void TaskAlarm(void *pv) {
     if (xQueueReceive(motionQueue, &alert, portMAX_DELAY)) {
       Serial.println("⚠ Movimiento detectado! ALARMA!");
       digitalWrite(LED_ALARM, HIGH);
+      
+      tone(SPEAKER_PIN,  262, 250);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
       digitalWrite(LED_ALARM, LOW);
     }

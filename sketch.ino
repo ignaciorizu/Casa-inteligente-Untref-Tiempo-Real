@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "SensorLuz.h"
 #include "SensorTemperatura.h"
+#include "SensorMovimiento.h"
+#include "Alarma.h"
 #include <DHT.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -27,6 +29,11 @@
 #define PIR_PIN 19      // Sensor de Movimiento
 #define LED_ALARM 25    // Alarma
 #define SPEAKER_PIN 26  // Sirena de alarma
+#define BOTON_APAGADO_ALARMA 5 // Parada de alarma
+
+// ===== GLOBAL =====
+SensorMovimiento pir(PIR_PIN);
+Alarma alarma(SPEAKER_PIN, LED_ALARM, BOTON_APAGADO_ALARMA);
 
 // ----- FreeRTOS ----- //
 QueueHandle_t motionQueue;
@@ -44,10 +51,7 @@ void TaskAlarm(void *pv);
 void setup() {
   Serial.begin(115200);
   
-  pinMode(PIR_PIN, INPUT);
   pinMode(LED_THERM, OUTPUT);
-  pinMode(LED_ALARM, OUTPUT);
-  pinMode(SPEAKER_PIN, OUTPUT);
 
   motionQueue = xQueueCreate(5, sizeof(int));
 
@@ -129,24 +133,16 @@ void TaskLight(void *pv) {
 
 void TaskMotion(void *pv) {
   while (1) {
-    if (digitalRead(PIR_PIN)) {
-      int alert = 1;
-      xQueueSend(motionQueue, &alert, 0);
+    if (pir.hayMovimiento()) {
+      alarma.activar();
     }
-    vTaskDelay(300 / portTICK_PERIOD_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
 void TaskAlarm(void *pv) {
-  int alert;
-  while (1) {
-    if (xQueueReceive(motionQueue, &alert, portMAX_DELAY)) {
-      Serial.println("Movimiento detectado! ALARMA!");
-      digitalWrite(LED_ALARM, HIGH);
-      
-      tone(SPEAKER_PIN,  262, 250);
-      vTaskDelay(2000 / portTICK_PERIOD_MS);
-      digitalWrite(LED_ALARM, LOW);
+    while (1) {
+        alarma.chequearBoton(); // Maneja apagado
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-  }
 }

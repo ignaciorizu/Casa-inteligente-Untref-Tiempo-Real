@@ -10,5 +10,5 @@ SensorLuz::SensorLuz(int ldr, int led) {
 
 void SensorLuz::actualizar() {
   int light = digitalRead(ldrPin);
-  digitalWrite(ledPin, light); 
+  digitalWrite(ledPin, light);
 }

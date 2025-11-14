@@ -24,19 +24,23 @@
 #define DHTPIN_PASILLO 4     // Sensor de Temperatura - Pasillo
 #define DHTPIN_SALA 15        // Sensor de Temperatura - Sala
 
-#define LED_THERM 27   // Termostato - Entrada
+#define LED_THERM 27   // Termostato General
 
-#define PIR_PIN 19      // Sensor de Movimiento
+#define PIR_PIN_ENTRADA 19      // Sensor de Movimiento - Entrada
+#define PIR_PIN_PASILLO 21      // Sensor de Movimiento - Pasillo
+#define PIR_PIN_SALA 18      // Sensor de Movimiento - Sala
+
 #define LED_ALARM 25    // Alarma
 #define SPEAKER_PIN 26  // Sirena de alarma
 #define BOTON_APAGADO_ALARMA 5 // Parada de alarma
 
 // ===== GLOBAL =====
-SensorMovimiento pir(PIR_PIN);
+SensorMovimiento pirEntrada(PIR_PIN_ENTRADA);
+SensorMovimiento pirPasillo(PIR_PIN_PASILLO);
+SensorMovimiento pirSala(PIR_PIN_SALA);
 Alarma alarma(SPEAKER_PIN, LED_ALARM);
 
 // ----- FreeRTOS ----- //
-QueueHandle_t motionQueue;
 QueueHandle_t botonQueue;
 
 // ----- Funciones auxiliares ----- //
@@ -55,7 +59,6 @@ void setup() {
   
   pinMode(LED_THERM, OUTPUT);
 
-  motionQueue = xQueueCreate(5, sizeof(int));
   botonQueue  = xQueueCreate(5, sizeof(int));
   
   pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
@@ -141,9 +144,14 @@ void TaskLight(void *pv) {
 
 void TaskMotion(void *pv) {
     while (1) {
-        if (pir.hayMovimiento()) {
+
+        if (pirEntrada.hayMovimiento() ||
+            pirPasillo.hayMovimiento() ||
+            pirSala.hayMovimiento()) 
+        {
             alarma.activar();
         }
+
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

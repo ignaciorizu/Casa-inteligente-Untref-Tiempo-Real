@@ -5,17 +5,17 @@
 #include <DHT.h>
 
 class SensorTemperatura {
-private:
-  DHT dht;
-  int ledPin;
-  float tempMin;
-  float tempMax;
-  float ultimaTemp;
+  private:
+    DHT dht;
+    int ledPin;
+    float tempMin;
+    float tempMax;
+    float ultimaTemp;
 
-public:
-  SensorTemperatura(int pinDHT, int pinLED, float tMin = 20.0, float tMax = 24.0);
-  void actualizar();
-  float getTemperatura() const;
+  public:
+    SensorTemperatura(int pinDHT, int pinLED, float tMin = 20.0, float tMax = 24.0);
+    void actualizar();
+    float getTemperatura() const;
 };
 
 #endif

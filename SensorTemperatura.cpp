@@ -10,12 +10,7 @@ void SensorTemperatura::actualizar() {
   float t = dht.readTemperature();
   if (!isnan(t)) {
     ultimaTemp = t;
-    Serial.printf("Temperatura actual: %.2f °C\n", t);
-
-    if (t < tempMin)
-      digitalWrite(ledPin, HIGH);
-    else if (t > tempMax)
-      digitalWrite(ledPin, LOW);
+    Serial.printf("Temp (pin %d): %.2f °C\n", ledPin, t);
   }
 }
 

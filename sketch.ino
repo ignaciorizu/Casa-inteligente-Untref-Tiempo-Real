@@ -31,6 +31,10 @@ DHT dht(DHTPIN, DHTTYPE);
 // ----- FreeRTOS ----- //
 QueueHandle_t motionQueue;
 
+// ----- Funciones auxiliares ----- //
+float leerTemperaturas(SensorTemperatura sensores[], int cantidad);
+void controlarCalefaccion(float promedio);
+
 // ----- Tareas ----- //
 void TaskTemp(void *pv);
 void TaskLight(void *pv);
@@ -58,19 +62,45 @@ void loop() {}
 // ===== TASKS ===== //
 
 void TaskTemp(void *pv) {
-  SensorTemperatura sensor(DHTPIN, LED_THERM);
+  SensorTemperatura sensores[CANT_HABITACIONES] = {
+    SensorTemperatura(DHTPIN_ENTRADA, LED_THERM),
+    SensorTemperatura(DHTPIN_PASILLO, LED_THERM),
+    SensorTemperatura(DHTPIN_SALA, LED_THERM)
+  };
 
   while (1) {
-    sensor.actualizar();
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    float suma = 0;
+    int count = 0;
+
+    for (auto &s : sensores) {
+      s.actualizar();
+      float t = s.getTemperatura();
+      if (!isnan(t)) {
+        suma += t;
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      float promedio = suma / count;
+      Serial.printf("Temp promedio: %.2f °C\n", promedio);
+
+      // Control del calefactor basado en promedio
+      if (promedio < 20.0)
+        digitalWrite(LED_THERM, HIGH);
+      else if (promedio > 24.0)
+        digitalWrite(LED_THERM, LOW);
+    }
+
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
   }
 }
 
 void TaskLight(void *pv) {
   SensorLuz luces[CANT_HABITACIONES]= {
-     SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
-     SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
-     SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
+    SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
+    SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
+    SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
   };
 
   while (1) {

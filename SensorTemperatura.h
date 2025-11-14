@@ -14,7 +14,6 @@ private:
 
 public:
   SensorTemperatura(int pinDHT, int pinLED, float tMin = 20.0, float tMax = 24.0);
-  void iniciar();
   void actualizar();
   float getTemperatura() const;
 };

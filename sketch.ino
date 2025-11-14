@@ -59,7 +59,6 @@ void loop() {}
 
 void TaskTemp(void *pv) {
   SensorTemperatura sensor(DHTPIN, LED_THERM);
-  sensor.iniciar();
 
   while (1) {
     sensor.actualizar();

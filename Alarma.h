@@ -4,19 +4,18 @@
 #include <Arduino.h>
 
 class Alarma {
-private:
-    int buzzerPin;
-    int ledPin;
-    int botonPin;
-    int estado;  // 0 = OFF, 1 = ON
-
 public:
-    Alarma(int buz, int led, int btn);
+    Alarma(int pinSpeaker, int pinLed);
 
-    void activar();
-    void apagar();
-    void chequearBoton();
-    int getEstado() const;
+    void activar();      // Activa sirena y LED
+    void desactivar();   // Apaga sirena y LED
+    void actualizar();   // Mantiene el estado activo
+    bool estaActiva() const;
+
+private:
+        int pinSpeaker;
+        int pinLed;
+        volatile bool activa;
 };
 
 #endif

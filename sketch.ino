@@ -33,12 +33,14 @@
 
 // ===== GLOBAL =====
 SensorMovimiento pir(PIR_PIN);
-Alarma alarma(SPEAKER_PIN, LED_ALARM, BOTON_APAGADO_ALARMA);
+Alarma alarma(SPEAKER_PIN, LED_ALARM);
 
 // ----- FreeRTOS ----- //
 QueueHandle_t motionQueue;
+QueueHandle_t botonQueue;
 
 // ----- Funciones auxiliares ----- //
+void IRAM_ATTR botonISR();
 float leerTemperaturas(SensorTemperatura sensores[], int cantidad);
 void controlarCalefaccion(float promedio);
 
@@ -54,10 +56,14 @@ void setup() {
   pinMode(LED_THERM, OUTPUT);
 
   motionQueue = xQueueCreate(5, sizeof(int));
+  botonQueue  = xQueueCreate(5, sizeof(int));
+  
+  pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
 
   xTaskCreate(TaskTemp, "Temp", 4096, NULL, 3, NULL);
   xTaskCreate(TaskLight, "Light", 2048, NULL, 2, NULL);
-  xTaskCreate(TaskMotion, "Motion", 2048, NULL, 3, NULL);
+  xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
   xTaskCreate(TaskAlarm, "Alarm", 2048, NULL, 2, NULL);
 }
 
@@ -65,7 +71,11 @@ void loop() {}
 
 // ===== FUNCIONES AUXILIARES ===== //
 
-// Lee los sensores y calcula el promedio de temperatura
+void IRAM_ATTR botonISR() {
+    int msg = 1;
+    xQueueSendFromISR(botonQueue, &msg, NULL);
+}
+
 float leerTemperaturas(SensorTemperatura sensores[], int cantidad) {
   float suma = 0;
   int count = 0;
@@ -85,7 +95,6 @@ float leerTemperaturas(SensorTemperatura sensores[], int cantidad) {
   return promedio;
 }
 
-// Controla el calefactor según el promedio
 void controlarCalefaccion(float promedio) {
 
   if (isnan(promedio)) return;
@@ -130,19 +139,24 @@ void TaskLight(void *pv) {
   }
 }
 
-
 void TaskMotion(void *pv) {
-  while (1) {
-    if (pir.hayMovimiento()) {
-      alarma.activar();
+    while (1) {
+        if (pir.hayMovimiento()) {
+            alarma.activar();
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
 }
 
 void TaskAlarm(void *pv) {
+    int msg = 0;
     while (1) {
-        alarma.chequearBoton(); // Maneja apagado
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+
+        if (xQueueReceive(botonQueue, &msg, 0) == pdTRUE) {
+            alarma.desactivar();
+        }
+
+        alarma.actualizar();
+        vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 }

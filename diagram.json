@@ -8,51 +8,59 @@
       "type": "wokwi-led",
       "id": "ledLight4",
       "top": 390,
-      "left": -562.6,
+      "left": -389.8,
       "attrs": { "color": "yellow" }
     },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr4",
       "top": 396.8,
-      "left": -508,
+      "left": -335.2,
       "attrs": {}
     },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr5",
       "top": 492.8,
-      "left": -508,
+      "left": -335.2,
       "attrs": {}
     },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr6",
       "top": 588.8,
-      "left": -508,
+      "left": -335.2,
       "attrs": {}
     },
     {
       "type": "wokwi-led",
       "id": "ledLight5",
       "top": 486,
-      "left": -562.6,
+      "left": -389.8,
       "attrs": { "color": "yellow" }
     },
     {
       "type": "wokwi-led",
       "id": "ledLight6",
       "top": 582,
-      "left": -562.6,
+      "left": -389.8,
       "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht4",
+      "top": 422.7,
+      "left": 177,
+      "attrs": { "temperature": "22.5", "humidity": "0" }
     },
     {
       "type": "wokwi-dht22",
       "id": "dht5",
       "top": 422.7,
       "left": 244.2,
-      "attrs": { "temperature": "24.1" }
+      "attrs": { "temperature": "11" }
     },
+    { "type": "wokwi-dht22", "id": "dht6", "top": 422.7, "left": 311.4, "attrs": {} },
     { "type": "wokwi-pir-motion-sensor", "id": "pir5", "top": 263.2, "left": -16.98, "attrs": {} },
     {
       "type": "wokwi-led",
@@ -78,8 +86,8 @@
     {
       "type": "wokwi-text",
       "id": "text2",
-      "top": 470.4,
-      "left": -460.8,
+      "top": 364.8,
+      "left": -297.6,
       "attrs": { "text": "Luxometro" }
     },
     {
@@ -98,9 +106,8 @@
     }
   ],
   "connections": [
-    [ "ldr4:VCC", "esp1:3V3", "red", [ "h38.4", "v220.8", "h393.6", "v-48" ] ],
-    [ "ldr5:VCC", "esp1:3V3", "red", [ "h38.4", "v124.8", "h393.6", "v-48" ] ],
-    [ "ldr6:VCC", "esp1:3V3", "red", [ "h38.4", "v28.8", "h393.6", "v-48" ] ],
+    [ "ldr4:VCC", "esp1:3V3", "red", [ "h38.4", "v220.8", "h220.8", "v-48" ] ],
+    [ "ldr6:VCC", "esp1:3V3", "red", [ "h38.4", "v28.8", "h220.8", "v-48" ] ],
     [ "ldr5:GND", "esp1:GND.2", "black", [ "h28.8", "v-0.4" ] ],
     [ "ldr6:GND", "esp1:GND.2", "black", [ "h28.8", "v-38.8" ] ],
     [ "ldr4:GND", "esp1:GND.2", "black", [ "h28.8", "v153.2" ] ],
@@ -108,23 +115,31 @@
     [ "ledLight4:C", "esp1:GND.2", "black", [ "v38.4", "h240.4", "v105.6" ] ],
     [ "ledLight5:C", "esp1:GND.2", "black", [ "v0" ] ],
     [ "ledLight6:C", "esp1:GND.2", "black", [ "v38.4", "h240.4", "v-86.4" ] ],
-    [ "ldr5:DO", "esp1:D32", "green", [ "h57.6", "v-29.3" ] ],
+    [ "ldr5:DO", "esp1:D32", "green", [ "h19.2", "v-29.3" ] ],
+    [ "dht4:VCC", "esp1:3V3", "red", [ "v48", "h-114.9" ] ],
     [ "dht5:VCC", "esp1:3V3", "red", [ "v0" ] ],
+    [ "dht6:VCC", "esp1:3V3", "red", [ "v0" ] ],
+    [ "dht4:GND", "esp1:GND.1", "black", [ "v0" ] ],
     [ "dht5:GND", "esp1:GND.1", "black", [ "v0" ] ],
+    [ "dht6:GND", "esp1:GND.1", "black", [ "v0" ] ],
     [ "dht5:SDA", "esp1:D2", "green", [ "v0" ] ],
-    [ "pir5:VCC", "esp1:VIN", "red", [ "v19.2", "h-105.6", "v211.2" ] ],
+    [ "pir5:VCC", "esp1:VIN", "red", [ "v9.6", "h-105.6", "v220.8" ] ],
     [ "pir5:GND", "esp1:GND.2", "black", [ "v19.2", "h-105.86", "v201.6" ] ],
     [ "esp1:D19", "pir5:OUT", "green", [ "h28.5", "v-115.3", "h-76.8" ] ],
     [ "ledThermo1:C", "esp1:GND.1", "black", [ "v9.6", "h-105.2", "v182.5" ] ],
     [ "ledThermo1:A", "esp1:D27", "green", [ "v19.2", "h-326.4", "v134.7" ] ],
     [ "esp1:D25", "ledAlarm1:A", "green", [ "h-9.6", "v-278.4", "h67.2" ] ],
     [ "ledAlarm1:C", "esp1:GND.2", "black", [ "v0", "h-66.8", "v326.4" ] ],
-    [ "esp1:D33", "ldr6:DO", "green", [ "h-249.6", "v115.8" ] ],
-    [ "esp1:D35", "ldr4:DO", "green", [ "h-259.2", "v-0.4" ] ],
-    [ "esp1:D14", "ledLight4:A", "green", [ "h-268.8", "v-86.3", "h-249.6" ] ],
+    [ "esp1:D35", "ldr4:DO", "green", [ "h-124.8", "v-57.4" ] ],
+    [ "esp1:D14", "ledLight4:A", "green", [ "h-134.4", "v-86.3", "h-211.2" ] ],
     [ "ledLight6:A", "esp1:D13", "green", [ "v28.8", "h249.6", "v-86.4" ] ],
+    [ "dht4:SDA", "esp1:D4", "green", [ "v0" ] ],
+    [ "dht6:SDA", "esp1:D15", "green", [ "v0" ] ],
     [ "bz1:1", "esp1:GND.2", "black", [ "v9.6", "h-48", "v403.2" ] ],
-    [ "bz1:2", "esp1:D26", "green", [ "v48", "h-67.6", "v316.8" ] ]
+    [ "bz1:2", "esp1:D26", "green", [ "v48", "h-67.6", "v316.8" ] ],
+    [ "ldr6:DO", "esp1:D33", "green", [ "h57.6", "v-115.8" ] ],
+    [ "esp1:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp1:RX0", "$serialMonitor:TX", "", [] ]
   ],
   "dependencies": {}
 }

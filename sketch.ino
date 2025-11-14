@@ -8,7 +8,7 @@
 
 // ----- CONFIG ----- //
 
-#define CANT_HABITACIONES 3
+#define CANT_HABITACIONES 3  
 
 #define LDR_PIN_ENTRADA 32     // Sensor de Luz - Entrada
 #define LDR_PIN_PASILLO 35     // Sensor de Luz - Pasillo
@@ -18,15 +18,15 @@
 #define LED_LIGHT_PASILLO 14   // Iluminación - Pasillo
 #define LED_LIGHT_SALA 13      // Iluminación - Sala
 
-#define DHTPIN 2        // Sensor de Temperatura
-#define LED_THERM 27    // Calefaccion
+#define DHTPIN_ENTRADA 2    // Sensor de Temperatura - Entrada
+#define DHTPIN_PASILLO 4     // Sensor de Temperatura - Pasillo
+#define DHTPIN_SALA 15        // Sensor de Temperatura - Sala
+
+#define LED_THERM 27   // Termostato - Entrada
 
 #define PIR_PIN 19      // Sensor de Movimiento
 #define LED_ALARM 25    // Alarma
 #define SPEAKER_PIN 26  // Sirena de alarma
-
-#define DHTTYPE DHT22
-DHT dht(DHTPIN, DHTTYPE);
 
 // ----- FreeRTOS ----- //
 QueueHandle_t motionQueue;
@@ -43,7 +43,7 @@ void TaskAlarm(void *pv);
 
 void setup() {
   Serial.begin(115200);
-
+  
   pinMode(PIR_PIN, INPUT);
   pinMode(LED_THERM, OUTPUT);
   pinMode(LED_ALARM, OUTPUT);
@@ -59,6 +59,41 @@ void setup() {
 
 void loop() {}
 
+// ===== FUNCIONES AUXILIARES ===== //
+
+// Lee los sensores y calcula el promedio de temperatura
+float leerTemperaturas(SensorTemperatura sensores[], int cantidad) {
+  float suma = 0;
+  int count = 0;
+
+  for (int i = 0; i < cantidad; i++) {
+    sensores[i].actualizar();
+    float t = sensores[i].getTemperatura();
+    if (!isnan(t)) {
+      suma += t;
+      count++;
+    }
+  }
+
+  if (count == 0) return NAN;
+  float promedio = suma / count;
+  Serial.printf("Temperatura promedio: %.2f °C\n", promedio);
+  return promedio;
+}
+
+// Controla el calefactor según el promedio
+void controlarCalefaccion(float promedio) {
+
+  if (isnan(promedio)) return;
+
+  if (promedio < 20.0) {
+    digitalWrite(LED_THERM, HIGH);
+  } 
+  else if (promedio > 24.0) {
+    digitalWrite(LED_THERM, LOW);
+  }
+}
+
 // ===== TASKS ===== //
 
 void TaskTemp(void *pv) {
@@ -69,44 +104,24 @@ void TaskTemp(void *pv) {
   };
 
   while (1) {
-    float suma = 0;
-    int count = 0;
-
-    for (auto &s : sensores) {
-      s.actualizar();
-      float t = s.getTemperatura();
-      if (!isnan(t)) {
-        suma += t;
-        count++;
-      }
-    }
-
-    if (count > 0) {
-      float promedio = suma / count;
-      Serial.printf("Temp promedio: %.2f °C\n", promedio);
-
-      // Control del calefactor basado en promedio
-      if (promedio < 20.0)
-        digitalWrite(LED_THERM, HIGH);
-      else if (promedio > 24.0)
-        digitalWrite(LED_THERM, LOW);
-    }
-
+    float promedio = leerTemperaturas(sensores, CANT_HABITACIONES);
+    controlarCalefaccion(promedio);
     vTaskDelay(3000 / portTICK_PERIOD_MS);
   }
 }
 
+
 void TaskLight(void *pv) {
   SensorLuz luces[CANT_HABITACIONES]= {
-    SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
-    SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
-    SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
+     SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
+     SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
+     SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
   };
 
   while (1) {
     for (auto &l : luces) {
       l.actualizar();
-    }
+    } 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
@@ -126,9 +141,9 @@ void TaskAlarm(void *pv) {
   int alert;
   while (1) {
     if (xQueueReceive(motionQueue, &alert, portMAX_DELAY)) {
-      Serial.println("⚠ Movimiento detectado! ALARMA!");
+      Serial.println("Movimiento detectado! ALARMA!");
       digitalWrite(LED_ALARM, HIGH);
-
+      
       tone(SPEAKER_PIN,  262, 250);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
       digitalWrite(LED_ALARM, LOW);

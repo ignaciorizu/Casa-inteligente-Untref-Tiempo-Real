@@ -7,10 +7,11 @@ Alarma::Alarma(int speaker, int led)
   pinMode(pinLed, OUTPUT);
 }
 
-void Alarma::activar() {
+void Alarma::activar(String zona) {
   if (!activa) {
     activa = true;
-    Serial.println("ALERTA: Movimiento detectado → Alarma ACTIVADA");
+    Serial.print("ALARMA ACTIVADA por detección en: ");
+    Serial.println(zona);
   }
 }
 

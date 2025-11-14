@@ -7,7 +7,7 @@ class Alarma {
 public:
   Alarma(int pinSpeaker, int pinLed);
 
-  void activar();      // Activa sirena y LED
+  void activar(String zona);      // Activa sirena y LED
   void desactivar();   // Apaga sirena y LED
   void actualizar();   // Mantiene el estado activo
   bool estaActiva() const;

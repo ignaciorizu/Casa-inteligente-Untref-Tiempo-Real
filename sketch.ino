@@ -143,17 +143,16 @@ void TaskLight(void *pv) {
 }
 
 void TaskMotion(void *pv) {
-    while (1) {
+  while (1) {
+    if (pirEntrada.hayMovimiento())
+      alarma.activar("Entrada");
+    if (pirPasillo.hayMovimiento())
+      alarma.activar("Pasillo");
+    if (pirSala.hayMovimiento())
+      alarma.activar("Sala");
 
-        if (pirEntrada.hayMovimiento() ||
-            pirPasillo.hayMovimiento() ||
-            pirSala.hayMovimiento()) 
-        {
-            alarma.activar();
-        }
-
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
 }
 
 void TaskAlarm(void *pv) {

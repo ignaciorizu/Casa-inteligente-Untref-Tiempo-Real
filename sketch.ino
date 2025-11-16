@@ -129,9 +129,9 @@ void TaskTemp(void *pv) {
 
 void TaskLight(void *pv) {
   SensorLuz luces[CANT_HABITACIONES]= {
-     SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA),
-     SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO),
-     SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA)
+    SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA, "Entrada"),
+    SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO, "Pasillo"),
+    SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA, "Sala")
   };
 
   while (1) {

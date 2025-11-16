@@ -16,6 +16,8 @@ class SensorTemperatura {
     SensorTemperatura(int pinDHT, int pinLED, float tMin = 20.0, float tMax = 24.0);
     void actualizar();
     float getTemperatura() const;
+    int getLedPin() const { return ledPin; }
 };
+
 
 #endif

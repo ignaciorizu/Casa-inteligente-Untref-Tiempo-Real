@@ -12,27 +12,29 @@
 
 #define CANT_HABITACIONES 3  
 
-#define LDR_PIN_ENTRADA 32     // Sensor de Luz - Entrada
-#define LDR_PIN_PASILLO 35     // Sensor de Luz - Pasillo
-#define LDR_PIN_SALA 33        // Sensor de Luz - Sala
+#define LDR_PIN_ENTRADA 32
+#define LDR_PIN_PASILLO 35
+#define LDR_PIN_SALA 33
 
-#define LED_LIGHT_ENTRADA 12   // Iluminación - Entrada
-#define LED_LIGHT_PASILLO 14   // Iluminación - Pasillo
-#define LED_LIGHT_SALA 13      // Iluminación - Sala
+#define LED_LIGHT_ENTRADA 12
+#define LED_LIGHT_PASILLO 14
+#define LED_LIGHT_SALA 13
 
-#define DHTPIN_ENTRADA 2    // Sensor de Temperatura - Entrada
-#define DHTPIN_PASILLO 4     // Sensor de Temperatura - Pasillo
-#define DHTPIN_SALA 15        // Sensor de Temperatura - Sala
+#define DHTPIN_ENTRADA 2
+#define DHTPIN_PASILLO 4
+#define DHTPIN_SALA 15
 
-#define LED_THERM 27   // Termostato General
+#define LED_THERM_ENTRADA 27
+#define LED_THERM_PASILLO 3
+#define LED_THERM_SALA    1
 
-#define PIR_PIN_ENTRADA 19      // Sensor de Movimiento - Entrada
-#define PIR_PIN_PASILLO 21      // Sensor de Movimiento - Pasillo
-#define PIR_PIN_SALA 18      // Sensor de Movimiento - Sala
+#define PIR_PIN_ENTRADA 19
+#define PIR_PIN_PASILLO 21
+#define PIR_PIN_SALA 18
 
-#define LED_ALARM 25    // Alarma
-#define SPEAKER_PIN 26  // Sirena de alarma
-#define BOTON_APAGADO_ALARMA 5 // Parada de alarma
+#define LED_ALARM 25
+#define SPEAKER_PIN 26
+#define BOTON_APAGADO_ALARMA 5
 
 // ===== GLOBAL =====
 SensorMovimiento pirEntrada(PIR_PIN_ENTRADA);
@@ -40,104 +42,63 @@ SensorMovimiento pirPasillo(PIR_PIN_PASILLO);
 SensorMovimiento pirSala(PIR_PIN_SALA);
 Alarma alarma(SPEAKER_PIN, LED_ALARM);
 
-// ----- FreeRTOS ----- //
 QueueHandle_t botonQueue;
 
-// ----- Funciones auxiliares ----- //
+// ===== Funciones auxiliares ===== //
 void IRAM_ATTR botonISR();
-float leerTemperaturas(SensorTemperatura sensores[], int cantidad);
-void controlarCalefaccion(float promedio);
 
-// ----- Tareas ----- //
-void TaskTemp(void *pv);
-void TaskLight(void *pv);
-void TaskMotion(void *pv);
-void TaskAlarm(void *pv);
-
-void setup() {
-  Serial.begin(115200);
-  
-  pinMode(LED_THERM, OUTPUT);
-
-  botonQueue  = xQueueCreate(5, sizeof(int));
-  
-  pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
-
-  xTaskCreate(TaskTemp, "Temp", 4096, NULL, 3, NULL);
-  xTaskCreate(TaskLight, "Light", 2048, NULL, 2, NULL);
-  xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
-  xTaskCreate(TaskAlarm, "Alarm", 2048, NULL, 2, NULL);
-}
-
-void loop() {}
-
-// ===== FUNCIONES AUXILIARES ===== //
-
-void IRAM_ATTR botonISR() {
-    int msg = 1;
-    xQueueSendFromISR(botonQueue, &msg, NULL);
-}
-
-float leerTemperaturas(SensorTemperatura sensores[], int cantidad) {
-  float suma = 0;
-  int count = 0;
-
+// -----------------------------------------
+// Nueva función individual por sensor
+// -----------------------------------------
+void controlarCalefaccionIndividual(SensorTemperatura sensores[], int cantidad) {
   for (int i = 0; i < cantidad; i++) {
-    sensores[i].actualizar();
+
     float t = sensores[i].getTemperatura();
-    if (!isnan(t)) {
-      suma += t;
-      count++;
-    }
-  }
+    int led = sensores[i].getLedPin();
 
-  if (count == 0) return NAN;
-  float promedio = suma / count;
-  Serial.printf("Temperatura promedio: %.2f °C\n", promedio);
-  return promedio;
-}
+    if (isnan(t)) continue;
 
-void controlarCalefaccion(float promedio) {
-
-  if (isnan(promedio)) return;
-
-  if (promedio < 20.0) {
-    digitalWrite(LED_THERM, HIGH);
-  } 
-  else if (promedio > 24.0) {
-    digitalWrite(LED_THERM, LOW);
+    if (t < 20.0)
+        digitalWrite(led, HIGH);
+    else if (t > 24.0)
+        digitalWrite(led, LOW);
   }
 }
 
-// ===== TASKS ===== //
+// ===== TAREAS ===== //
 
 void TaskTemp(void *pv) {
   SensorTemperatura sensores[CANT_HABITACIONES] = {
-    SensorTemperatura(DHTPIN_ENTRADA, LED_THERM),
-    SensorTemperatura(DHTPIN_PASILLO, LED_THERM),
-    SensorTemperatura(DHTPIN_SALA, LED_THERM)
+    SensorTemperatura(DHTPIN_ENTRADA, LED_THERM_ENTRADA),
+    SensorTemperatura(DHTPIN_PASILLO, LED_THERM_PASILLO),
+    SensorTemperatura(DHTPIN_SALA, LED_THERM_SALA)
   };
 
   while (1) {
-    float promedio = leerTemperaturas(sensores, CANT_HABITACIONES);
-    controlarCalefaccion(promedio);
+    
+    // Leer temperatura de cada sensor
+    for (int i = 0; i < CANT_HABITACIONES; i++) {
+      sensores[i].actualizar();
+    }
+
+    // Controlar calefacción por sensor
+    controlarCalefaccionIndividual(sensores, CANT_HABITACIONES);
+
     vTaskDelay(3000 / portTICK_PERIOD_MS);
   }
 }
 
-
 void TaskLight(void *pv) {
   SensorLuz luces[CANT_HABITACIONES]= {
-    SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA, "Entrada"),
-    SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO, "Pasillo"),
-    SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA, "Sala")
+     SensorLuz(LDR_PIN_ENTRADA, LED_LIGHT_ENTRADA, "Entrada"),
+     SensorLuz(LDR_PIN_PASILLO, LED_LIGHT_PASILLO, "Pasillo"),
+     SensorLuz(LDR_PIN_SALA, LED_LIGHT_SALA, "Sala")
   };
 
   while (1) {
     for (auto &l : luces) {
       l.actualizar();
-    } 
+    }
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
@@ -158,7 +119,6 @@ void TaskMotion(void *pv) {
 void TaskAlarm(void *pv) {
     int msg = 0;
     while (1) {
-
         if (xQueueReceive(botonQueue, &msg, 0) == pdTRUE) {
             alarma.desactivar();
         }
@@ -166,4 +126,30 @@ void TaskAlarm(void *pv) {
         alarma.actualizar();
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Configurar LEDs individuales
+  pinMode(LED_THERM_ENTRADA, OUTPUT);
+  pinMode(LED_THERM_PASILLO, OUTPUT);
+  pinMode(LED_THERM_SALA, OUTPUT);
+
+  botonQueue  = xQueueCreate(5, sizeof(int));
+
+  pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
+
+  xTaskCreate(TaskTemp,   "Temp",   4096, NULL, 3, NULL);
+  xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
+  xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
+  xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
+}
+
+void loop() {}
+
+void IRAM_ATTR botonISR() {
+    int msg = 1;
+    xQueueSendFromISR(botonQueue, &msg, NULL);
 }

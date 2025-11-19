@@ -18,8 +18,8 @@ public:
     void mostrarInicio();
 
     void mostrarHabitacion(const String &nombre,
-                        float temperatura,
-                        bool calefactorEncendido);
+                           float temperatura,
+                           bool calefactorEncendido);
 
     void mostrarAlarma(const String &zona);
 };

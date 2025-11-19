@@ -33,6 +33,7 @@
 //IR
 #define DATA_IR 16
 
+
 // ========== Instancia global estática ==========
 CasaInteligente* CasaInteligente::instancia = nullptr;
 
@@ -41,7 +42,7 @@ CasaInteligente* CasaInteligente::instancia = nullptr;
 //                Constructor
 // ==================================================
 CasaInteligente::CasaInteligente()
-    : alarma(SPEAKER_PIN, LED_ALARM) 
+    : alarma(SPEAKER_PIN, LED_ALARM), ir(DATA_IR) 
 {
     instancia = this;
 
@@ -74,7 +75,6 @@ CasaInteligente::CasaInteligente()
 //                 INICIAR EL SISTEMA
 // ==================================================
 void CasaInteligente::iniciar() {
-
     // LEDs calefacción
     for (int i = 0; i < CANT_HABITACIONES; i++) {
         pinMode(ledCalefaccion[i], OUTPUT);
@@ -89,12 +89,14 @@ void CasaInteligente::iniciar() {
 
     // IR
     ir.begin();
+    config = new ConfigManager(&pantalla);
 
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));
     pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
 }
+
 
 // ISR estática
 void IRAM_ATTR CasaInteligente::botonISR() {
@@ -107,11 +109,11 @@ void IRAM_ATTR CasaInteligente::botonISR() {
 //                  CREAR TAREAS
 // ==================================================
 void CasaInteligente::crearTareas() {
-    xTaskCreate(TaskTemp,   "Temp",   4096, NULL, 3, NULL);
-    xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
-    xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
-    xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
-    xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
+    //xTaskCreate(TaskTemp,   "Temp",   4096, NULL, 3, NULL);
+    //xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
+    //xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
+    //xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
+    //xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
     xTaskCreate(TaskIR, "IR", 2048, NULL, 1, NULL);
 }
 
@@ -157,7 +159,7 @@ void CasaInteligente::TaskIR(void* pv) {
     auto* casa = CasaInteligente::instancia;
 
     casa->pantalla.limpiar();
-    casa->pantalla.mostrarHabitacion("Esperando IR...", 0,true,0,true);
+    casa->pantalla.escribirLinea(0, "Esperando IR...");
 
     while (1) {
 
@@ -165,21 +167,20 @@ void CasaInteligente::TaskIR(void* pv) {
             uint32_t code = casa->ir.getLastCode();
             casa->ir.resume();
 
-            // Mostrar en el LCD
-            char buffer[20];
-            sprintf(buffer, "IR: %08lX", code);
+            // Activar / desactivar modo config con el botón POWER
+            if (code == 0x5DA2FF00) { // POWER
+                casa->config->setModoConfiguracion(!casa->config->getModoConfiguracion());
+            }
 
-            casa->pantalla.limpiar();
-            casa->pantalla.mostrarHabitacion(buffer, 0,true,0,true);
-
-            // Pequeña pausa para ver el valor
-            vTaskDelay(500 / portTICK_PERIOD_MS);
+            // Si estamos en modo configuración → mostrar info
+            casa->config->procesarCodigo(code);
         }
 
-        // Refrescar cuando no hay señal
         vTaskDelay(50 / portTICK_PERIOD_MS);
     }
 }
+
+
 
 // ==================================================
 //                TASK: TEMPERATURA
@@ -215,6 +216,7 @@ void CasaInteligente::TaskTemp(void* pv) {
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
+
 
 // ==================================================
 //                TASK: LUZ
@@ -259,6 +261,7 @@ void CasaInteligente::TaskMotion(void* pv) {
     }
 }
 
+
 // ==================================================
 //                TASK: ALARMA
 // ==================================================
@@ -277,4 +280,3 @@ void CasaInteligente::TaskAlarm(void* pv) {
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 }
-

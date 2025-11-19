@@ -12,6 +12,7 @@
 #include "Alarma.h"
 #include "PantallaLCD.h"
 #include "IRManager.h"
+#include "ConfigManager.h"
 
 #define CANT_HABITACIONES 3
 
@@ -37,6 +38,7 @@ private:
     Alarma alarma;
     EstadoPantalla estadoPantalla;
     IRManager ir;
+    ConfigManager* config;
 
     // Queue para botón
     QueueHandle_t botonQueue;
@@ -68,4 +70,3 @@ public:
 };
 
 #endif
-

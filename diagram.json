@@ -221,7 +221,9 @@
       "top": 630.4,
       "left": 159.2,
       "attrs": { "pins": "i2c" }
-    }
+    },
+    { "type": "wokwi-ir-receiver", "id": "ir1", "top": 689.85, "left": -164.98, "attrs": {} },
+    { "type": "wokwi-ir-remote", "id": "remote1", "top": 691.2, "left": -364.8, "attrs": {} }
   ],
   "connections": [
     [ "ldr4:VCC", "esp1:3V3", "red", [ "h38.4", "v230.4", "h230.4", "v-57.6" ] ],
@@ -252,7 +254,6 @@
     [ "ledThermo1:A", "esp1:D27", "cyan", [ "v19.2", "h-336", "v134.7" ] ],
     [ "esp1:D25", "ledAlarm1:A", "green", [ "h-19.2", "v-374.4", "h67.2" ] ],
     [ "ledAlarm1:C", "esp1:GND.2", "black", [ "h0.4", "v499.3" ] ],
-    [ "esp1:D14", "ledLight4:A", "gray", [ "h-134.4", "v-86.3", "h-211.2" ] ],
     [ "ledLight6:A", "esp1:D13", "gray", [ "v28.8", "h249.6", "v-86.4" ] ],
     [ "dht4:SDA", "esp1:D4", "blue", [ "v0" ] ],
     [ "dht6:SDA", "esp1:D15", "blue", [ "v0" ] ],
@@ -274,7 +275,11 @@
     [ "lcd2:VCC", "esp1:3V3", "red", [ "h-57.6", "v-86.3" ] ],
     [ "lcd2:SDA", "esp1:D23", "green", [ "h-67.2", "v-230.2" ] ],
     [ "esp1:D22", "lcd2:SCL", "green", [ "h9.3", "v-0.3" ] ],
-    [ "esp1:D19", "pir5:OUT", "orange", [ "h57.3", "v-124.9", "h-124.8" ] ]
+    [ "esp1:D19", "pir5:OUT", "orange", [ "h57.3", "v-124.9", "h-124.8" ] ],
+    [ "ir1:GND", "esp1:GND.2", "black", [ "v9.6", "h-28.8", "v-124.8", "h38.4", "v-86.4" ] ],
+    [ "ir1:VCC", "esp1:VIN", "red", [ "v19.2", "h86.4", "v-211.2" ] ],
+    [ "esp1:D14", "ledLight4:A", "gray", [ "h0" ] ],
+    [ "esp1:RX2", "ir1:DAT", "gold", [ "h57.3", "v249.3", "h-259.2" ] ]
   ],
   "dependencies": {}
 }

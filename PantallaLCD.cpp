@@ -23,7 +23,9 @@ void PantallaLCD::mostrarInicio() {
 
 void PantallaLCD::mostrarHabitacion(const String &nombre,
                                     float temperatura,
-                                    bool calefactorEncendido)
+                                    bool calefactorEncendido,
+                                    int lux,
+                                    bool luzEncendida)
 {
     lcd.clear();
 
@@ -36,6 +38,15 @@ void PantallaLCD::mostrarHabitacion(const String &nombre,
     lcd.setCursor(0,1);
     lcd.print("Calefactor: ");
     lcd.print(calefactorEncendido ? "ON" : "OFF");
+
+    lcd.setCursor(0,2);
+    lcd.print("Iluminacion: ");
+    lcd.print(lux);
+    lcd.print(" lux");
+    
+    lcd.setCursor(0,3);
+    lcd.print("Luz: ");
+    lcd.print(luzEncendida ? "ON" : "OFF");
 }
 
 void PantallaLCD::mostrarAlarma(const String &zona) {

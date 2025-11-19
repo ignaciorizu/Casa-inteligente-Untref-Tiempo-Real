@@ -31,6 +31,7 @@ private:
 
     // Pines
     int ledCalefaccion[CANT_HABITACIONES];
+    int ledIluminacion[CANT_HABITACIONES];
 
 public:
     CasaInteligente();

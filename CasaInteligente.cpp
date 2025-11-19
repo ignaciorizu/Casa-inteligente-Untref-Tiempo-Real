@@ -57,6 +57,10 @@ CasaInteligente::CasaInteligente()
     sensoresLuz[1] = new SensorLuz(LDR_PASILLO, LED_LIGHT_PASILLO, "Pasillo");
     sensoresLuz[2] = new SensorLuz(LDR_SALA, LED_LIGHT_SALA, "Sala");
 
+    ledIluminacion[0] = LED_LIGHT_ENTRADA;
+    ledIluminacion[1] = LED_LIGHT_PASILLO;
+    ledIluminacion[2] = LED_LIGHT_SALA;
+
     // Crear PIR
     sensoresMov[0] = new SensorMovimiento(PIR_ENTRADA);
     sensoresMov[1] = new SensorMovimiento(PIR_PASILLO);
@@ -137,19 +141,25 @@ void CasaInteligente::TaskTemp(void* pv) {
         // Mostrar una habitación por ciclo
         casa->pantalla.mostrarHabitacion("Entrada",
                 casa->sensoresTemp[0]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[0]));
+                digitalRead(casa->ledCalefaccion[0]),
+                casa->sensoresLuz[0]->getLux(),
+                digitalRead(casa->ledIluminacion[0]));
         vTaskDelay(3000 / portTICK_PERIOD_MS);
         if (casa->alarma.estaActiva()) continue;
 
         casa->pantalla.mostrarHabitacion("Pasillo",
                 casa->sensoresTemp[1]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[1]));
+                digitalRead(casa->ledCalefaccion[1]),
+                casa->sensoresLuz[1]->getLux(),
+                digitalRead(casa->ledIluminacion[1]));
         vTaskDelay(3000 / portTICK_PERIOD_MS);
         if (casa->alarma.estaActiva()) continue;
 
         casa->pantalla.mostrarHabitacion("Sala",
                 casa->sensoresTemp[2]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[2]));
+                digitalRead(casa->ledCalefaccion[2]),
+                casa->sensoresLuz[2]->getLux(),
+                digitalRead(casa->ledIluminacion[2]));
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }

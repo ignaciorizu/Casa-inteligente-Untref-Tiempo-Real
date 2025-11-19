@@ -30,6 +30,8 @@
 #define SPEAKER_PIN 26
 #define BOTON_APAGADO_ALARMA 5
 
+//IR
+#define DATA_IR 16
 
 // ========== Instancia global estática ==========
 CasaInteligente* CasaInteligente::instancia = nullptr;
@@ -85,12 +87,14 @@ void CasaInteligente::iniciar() {
     delay(1500);
     pantalla.limpiar();
 
+    // IR
+    ir.begin();
+
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));
     pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
 }
-
 
 // ISR estática
 void IRAM_ATTR CasaInteligente::botonISR() {
@@ -108,6 +112,7 @@ void CasaInteligente::crearTareas() {
     xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
     xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
     xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
+    xTaskCreate(TaskIR, "IR", 2048, NULL, 1, NULL);
 }
 
 
@@ -145,6 +150,36 @@ void CasaInteligente::TaskLCD(void* pv) {
     }
 }
 
+// ==================================================
+//                TASK: IR
+// ==================================================
+void CasaInteligente::TaskIR(void* pv) {
+    auto* casa = CasaInteligente::instancia;
+
+    casa->pantalla.limpiar();
+    casa->pantalla.mostrarHabitacion("Esperando IR...", 0,true,0,true);
+
+    while (1) {
+
+        if (casa->ir.available()) {
+            uint32_t code = casa->ir.getLastCode();
+            casa->ir.resume();
+
+            // Mostrar en el LCD
+            char buffer[20];
+            sprintf(buffer, "IR: %08lX", code);
+
+            casa->pantalla.limpiar();
+            casa->pantalla.mostrarHabitacion(buffer, 0,true,0,true);
+
+            // Pequeña pausa para ver el valor
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+        }
+
+        // Refrescar cuando no hay señal
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+    }
+}
 
 // ==================================================
 //                TASK: TEMPERATURA
@@ -180,7 +215,6 @@ void CasaInteligente::TaskTemp(void* pv) {
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
-
 
 // ==================================================
 //                TASK: LUZ
@@ -225,7 +259,6 @@ void CasaInteligente::TaskMotion(void* pv) {
     }
 }
 
-
 // ==================================================
 //                TASK: ALARMA
 // ==================================================
@@ -244,3 +277,4 @@ void CasaInteligente::TaskAlarm(void* pv) {
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 }
+

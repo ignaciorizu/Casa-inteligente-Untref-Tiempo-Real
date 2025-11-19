@@ -11,6 +11,7 @@
 #include "SensorMovimiento.h"
 #include "Alarma.h"
 #include "PantallaLCD.h"
+#include "IRManager.h"
 
 #define CANT_HABITACIONES 3
 
@@ -35,6 +36,7 @@ private:
     PantallaLCD pantalla;
     Alarma alarma;
     EstadoPantalla estadoPantalla;
+    IRManager ir;
 
     // Queue para botón
     QueueHandle_t botonQueue;
@@ -55,6 +57,7 @@ public:
     static void TaskMotion(void* pv);
     static void TaskAlarm(void* pv);
     static void TaskLCD(void* pv);
+    static void TaskIR(void* pv);
 
     // Acceso global a la instancia
     static CasaInteligente* instancia;
@@ -65,3 +68,4 @@ public:
 };
 
 #endif
+

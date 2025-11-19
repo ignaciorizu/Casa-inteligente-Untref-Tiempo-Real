@@ -21,6 +21,11 @@ void PantallaLCD::mostrarInicio() {
     lcd.print("Inicializando...");
 }
 
+void PantallaLCD::escribirLinea(int linea, const String &nombre) {
+    lcd.setCursor(0,linea);
+    lcd.print(nombre);
+}
+
 void PantallaLCD::mostrarHabitacion(const String &nombre,
                                     float temperatura,
                                     bool calefactorEncendido,

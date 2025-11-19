@@ -16,6 +16,7 @@ public:
     void limpiar();
 
     void mostrarInicio();
+    void escribirLinea(int linea, const String &nombre);
 
     void mostrarHabitacion(const String &nombre,
                            float temperatura,

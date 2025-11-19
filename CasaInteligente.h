@@ -14,6 +14,15 @@
 
 #define CANT_HABITACIONES 3
 
+// Estado de las habitaciones
+struct EstadoPantalla {
+  float temp[3];
+  int calefaccion[3];
+  int lux[3];
+  int luz[3];
+  String alarmaHab = "";
+};
+
 class CasaInteligente {
 private:
 
@@ -25,6 +34,7 @@ private:
     // Componentes principales
     PantallaLCD pantalla;
     Alarma alarma;
+    EstadoPantalla estadoPantalla;
 
     // Queue para botón
     QueueHandle_t botonQueue;
@@ -44,12 +54,14 @@ public:
     static void TaskLight(void* pv);
     static void TaskMotion(void* pv);
     static void TaskAlarm(void* pv);
+    static void TaskLCD(void* pv);
 
     // Acceso global a la instancia
     static CasaInteligente* instancia;
 
     // ISR
     static void IRAM_ATTR botonISR();
+
 };
 
 #endif

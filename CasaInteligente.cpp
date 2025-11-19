@@ -107,6 +107,42 @@ void CasaInteligente::crearTareas() {
     xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
     xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
     xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
+    xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
+}
+
+
+// ==================================================
+//                TASK: LCD
+// ==================================================
+void CasaInteligente::TaskLCD(void* pv) {
+    auto* casa = CasaInteligente::instancia;
+
+    int indice = 0;
+
+    while (1) {
+
+        // Si hay alarma → mostrar pantalla de alarma prolongada
+        if (casa->alarma.estaActiva()) {
+            casa->pantalla.mostrarAlarma(casa->estadoPantalla.alarmaHab);
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
+            continue;
+        }
+
+        // Si no hay alarma → ciclar entre habitaciones
+        const char* nombres[] = {"Entrada", "Pasillo", "Sala"};
+
+        casa->pantalla.mostrarHabitacion(
+            nombres[indice],
+            casa->estadoPantalla.temp[indice],
+            casa->estadoPantalla.calefaccion[indice],
+            casa->estadoPantalla.lux[indice],
+            casa->estadoPantalla.luz[indice]
+        );
+
+        indice = (indice + 1) % 3;
+
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
 }
 
 
@@ -130,6 +166,9 @@ void CasaInteligente::TaskTemp(void* pv) {
                 if (t < 20.0) digitalWrite(led, HIGH);
                 else if (t > 24.0) digitalWrite(led, LOW);
             }
+
+            casa->estadoPantalla.temp[i] = t;
+            casa->estadoPantalla.calefaccion[i] = digitalRead(casa->ledCalefaccion[i]);
         }
 
         // Si la alarma está activa, no mostrar temperatura
@@ -138,28 +177,6 @@ void CasaInteligente::TaskTemp(void* pv) {
             continue;
         }
 
-        // Mostrar una habitación por ciclo
-        casa->pantalla.mostrarHabitacion("Entrada",
-                casa->sensoresTemp[0]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[0]),
-                casa->sensoresLuz[0]->getLux(),
-                digitalRead(casa->ledIluminacion[0]));
-        vTaskDelay(3000 / portTICK_PERIOD_MS);
-        if (casa->alarma.estaActiva()) continue;
-
-        casa->pantalla.mostrarHabitacion("Pasillo",
-                casa->sensoresTemp[1]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[1]),
-                casa->sensoresLuz[1]->getLux(),
-                digitalRead(casa->ledIluminacion[1]));
-        vTaskDelay(3000 / portTICK_PERIOD_MS);
-        if (casa->alarma.estaActiva()) continue;
-
-        casa->pantalla.mostrarHabitacion("Sala",
-                casa->sensoresTemp[2]->getTemperatura(),
-                digitalRead(casa->ledCalefaccion[2]),
-                casa->sensoresLuz[2]->getLux(),
-                digitalRead(casa->ledIluminacion[2]));
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
@@ -174,11 +191,12 @@ void CasaInteligente::TaskLight(void* pv) {
     while (1) {
         for (int i = 0; i < CANT_HABITACIONES; i++) {
             casa->sensoresLuz[i]->actualizar();
+            casa->estadoPantalla.lux[i] = casa->sensoresLuz[i]->getLux();
+            casa->estadoPantalla.luz[i] = digitalRead(casa->ledIluminacion[i]);
         }
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
-
 
 // ==================================================
 //               TASK: MOVIMIENTO
@@ -190,17 +208,17 @@ void CasaInteligente::TaskMotion(void* pv) {
 
         if (casa->sensoresMov[0]->hayMovimiento()) {
             casa->alarma.activar("Entrada");
-            casa->pantalla.mostrarAlarma("Entrada");
+            casa->estadoPantalla.alarmaHab = "Entrada";
         }
 
         if (casa->sensoresMov[1]->hayMovimiento()) {
             casa->alarma.activar("Pasillo");
-            casa->pantalla.mostrarAlarma("Pasillo");
+            casa->estadoPantalla.alarmaHab = "Pasillo";
         }
 
         if (casa->sensoresMov[2]->hayMovimiento()) {
             casa->alarma.activar("Sala");
-            casa->pantalla.mostrarAlarma("Sala");
+            casa->estadoPantalla.alarmaHab = "Sala";
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));

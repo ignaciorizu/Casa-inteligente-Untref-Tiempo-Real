@@ -14,7 +14,6 @@ public:
 
     void iniciar();
     void limpiar();
-
     void mostrarInicio();
     void escribirLinea(int linea, const String &nombre);
 
@@ -25,6 +24,8 @@ public:
                            bool luzEncendida);
 
     void mostrarAlarma(const String &zona);
+    
+    void mostrarConfig(const String &titulo, const String &valor);
 };
 
 #endif

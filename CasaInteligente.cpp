@@ -109,11 +109,11 @@ void IRAM_ATTR CasaInteligente::botonISR() {
 //                  CREAR TAREAS
 // ==================================================
 void CasaInteligente::crearTareas() {
-    //xTaskCreate(TaskTemp,   "Temp",   4096, NULL, 3, NULL);
-    //xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
-    //xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
-    //xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
-    //xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
+    xTaskCreate(TaskTemp,   "Temp",   4096, NULL, 3, NULL);
+    xTaskCreate(TaskLight,  "Light",  2048, NULL, 2, NULL);
+    xTaskCreate(TaskMotion, "Motion", 2048, NULL, 2, NULL);
+    xTaskCreate(TaskAlarm,  "Alarm",  2048, NULL, 2, NULL);
+    xTaskCreate(TaskLCD, "LCD", 4096, NULL, 2, NULL);
     xTaskCreate(TaskIR, "IR", 2048, NULL, 1, NULL);
 }
 
@@ -128,14 +128,18 @@ void CasaInteligente::TaskLCD(void* pv) {
 
     while (1) {
 
-        // Si hay alarma → mostrar pantalla de alarma prolongada
         if (casa->alarma.estaActiva()) {
             casa->pantalla.mostrarAlarma(casa->estadoPantalla.alarmaHab);
             vTaskDelay(1500 / portTICK_PERIOD_MS);
             continue;
         }
+        
+        if (casa->mostrarConfigFlag) {
+            casa->pantalla.mostrarConfig(casa->configTitulo, casa->configValor);
+            vTaskDelay(500); 
+            continue;
+        }
 
-        // Si no hay alarma → ciclar entre habitaciones
         const char* nombres[] = {"Entrada", "Pasillo", "Sala"};
 
         casa->pantalla.mostrarHabitacion(
@@ -148,9 +152,10 @@ void CasaInteligente::TaskLCD(void* pv) {
 
         indice = (indice + 1) % 3;
 
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        vTaskDelay(500  / portTICK_PERIOD_MS);
     }
 }
+
 
 // ==================================================
 //                TASK: IR
@@ -158,22 +163,19 @@ void CasaInteligente::TaskLCD(void* pv) {
 void CasaInteligente::TaskIR(void* pv) {
     auto* casa = CasaInteligente::instancia;
 
-    casa->pantalla.limpiar();
-    casa->pantalla.escribirLinea(0, "Esperando IR...");
-
     while (1) {
 
         if (casa->ir.available()) {
             uint32_t code = casa->ir.getLastCode();
             casa->ir.resume();
 
-            // Activar / desactivar modo config con el botón POWER
-            if (code == 0x5DA2FF00) { // POWER
-                casa->config->setModoConfiguracion(!casa->config->getModoConfiguracion());
+            if (code == 0x5DA2FF00) {
+                casa->mostrarConfigFlag = !casa->mostrarConfigFlag;
             }
 
-            // Si estamos en modo configuración → mostrar info
-            casa->config->procesarCodigo(code);
+            casa->config->procesarCodigoIR(code);
+            casa->configTitulo = casa->ir.getLastCode();
+            casa->configValor = casa->config->obtenerNombre(casa->ir.getLastCode());
         }
 
         vTaskDelay(50 / portTICK_PERIOD_MS);

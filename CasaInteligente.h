@@ -27,7 +27,6 @@ struct EstadoPantalla {
 
 class CasaInteligente {
 private:
-
     // Sensores
     SensorTemperatura* sensoresTemp[CANT_HABITACIONES];
     SensorLuz* sensoresLuz[CANT_HABITACIONES];
@@ -46,6 +45,11 @@ private:
     // Pines
     int ledCalefaccion[CANT_HABITACIONES];
     int ledIluminacion[CANT_HABITACIONES];
+
+    //Configuracion de datos
+    bool mostrarConfigFlag = false;
+    String configTitulo = "";
+    String configValor = "";
 
 public:
     CasaInteligente();

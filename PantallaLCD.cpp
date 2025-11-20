@@ -62,3 +62,19 @@ void PantallaLCD::mostrarAlarma(const String &zona) {
     lcd.setCursor(0,1);
     lcd.print(zona);
 }
+
+void PantallaLCD::mostrarConfig(const String &titulo, const String &valor) {
+    lcd.clear();
+
+    lcd.setCursor(0,0);
+    lcd.print("CONFIG:");
+
+    lcd.setCursor(0,1);
+    lcd.print(titulo);
+
+    lcd.setCursor(0,2);
+    lcd.print("Valor:");
+
+    lcd.setCursor(0,3);
+    lcd.print(valor);
+}

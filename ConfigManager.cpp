@@ -48,7 +48,7 @@ bool ConfigManager::getModoConfiguracion() {
 }
 
 
-void ConfigManager::procesarCodigo(uint32_t code) {
+void ConfigManager::procesarCodigoIR(uint32_t code) {
     if (!modoConfiguracion) return;
 
     pantalla->limpiar();

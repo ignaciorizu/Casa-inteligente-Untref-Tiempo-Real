@@ -13,14 +13,13 @@ public:
     void setModoConfiguracion(bool activo);
     bool getModoConfiguracion();
 
-    // Procesar código IR recibido
-    void procesarCodigo(uint32_t code);
+    void procesarCodigoIR(uint32_t code);
+    
+    const char* obtenerNombre(uint32_t code);
 
 private:
     bool modoConfiguracion = false;
     PantallaLCD* pantalla;
-
-    const char* obtenerNombre(uint32_t code);
 };
 
 #endif

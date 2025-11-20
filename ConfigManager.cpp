@@ -8,7 +8,9 @@ void ConfigManager::setModoConfig(bool activo) {
 }
 
 void ConfigManager::procesarCodigoIR(IRButton boton) {
-    if (!modoConfiguracion) return;
+    if (!modoConfiguracion) {
+        return;
+    }
 
     switch (boton) {
 
@@ -16,7 +18,7 @@ void ConfigManager::procesarCodigoIR(IRButton boton) {
             opcionActual++;
             if (opcionActual > 2) {
                 opcionActual = 0;
-            } 
+            }
             break;
 
         case IR_RETROCEDER:
@@ -42,19 +44,26 @@ void ConfigManager::procesarCodigoIR(IRButton boton) {
 
 void ConfigManager::incrementarValor() {
     switch (opcionActual) {
-        case 0: 
+
+        case 0:  // Temp Min
             if (tempMin < 45.0) {
                 tempMin += 0.5;
-            } 
+            }
             break;
-        case 1: 
+
+        case 1:  // Temp Max
             if (tempMax < 45.0) {
                 tempMax += 0.5;
-            } 
+            }
             break;
-        case 2: 
-            if (umbralLux < 9950) {
+
+        case 2:  // Umbral de Luz
+            if (umbralLux < 150) {
+                umbralLux += 10;
+            } else if (umbralLux < 2000) {
                 umbralLux += 50;
+            } else if (umbralLux < 10000) {
+                umbralLux += 100;
             }
             break;
     }
@@ -62,19 +71,26 @@ void ConfigManager::incrementarValor() {
 
 void ConfigManager::decrementarValor() {
     switch (opcionActual) {
-        case 0: 
+
+        case 0:  // Temp Min
             if (tempMin > 0.0) {
                 tempMin -= 0.5;
             }
             break;
-        case 1: 
+
+        case 1:  // Temp Max
             if (tempMax > 0.0) {
                 tempMax -= 0.5;
             }
             break;
-        case 2: 
-            if (umbralLux > 1) {
+
+        case 2:  // Umbral de Luz
+            if (umbralLux > 2000) {
+                umbralLux -= 100;
+            } else if (umbralLux > 150) {
                 umbralLux -= 50;
+            } else if (umbralLux > 0) {
+                umbralLux -= 10;
             }
             break;
     }
@@ -82,8 +98,8 @@ void ConfigManager::decrementarValor() {
 
 String ConfigManager::getTextoOpcion() const {
     switch (opcionActual) {
-        case 0: return "Temp Min (°C)";
-        case 1: return "Temp Max (°C)";
+        case 0: return "Temp Min (C)";
+        case 1: return "Temp Max (C)";
         case 2: return "Umbral Luz";
         default: return "";
     }

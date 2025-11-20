@@ -2,25 +2,20 @@
 #define SENSOR_LUZ_H
 
 #include <Arduino.h>
+#include "ConfigManager.h"
 
 class SensorLuz {
 public:
-  // Umbral en lux (puedes cambiarlo)
-  static constexpr float UMBRAL_LUX = 100.0f;
+    SensorLuz(int pinLDR_, int pinLED_, const char* nombreZona, ConfigManager& cfg);
 
-  // Constructor: pinLDR = ADC pin (p. ej. 32), pinLED = salida digital, nombre para debug
-  SensorLuz(int pinLDR, int pinLED, const char* nombreZona);
-
-  // Lee el ADC, calcula lux, controla el LED y actualiza el valor interno
-  void actualizar();
-
-  // Devuelve el lux calculado (valor filtrado si se usa smoothing)
-  float getLux() const;
+    void actualizar();
+    float getLux() const;
 
 private:
   int ldrPin;
   int ledPin;
   const char* nombre;
+  ConfigManager& config;
 
   // Parámetros del modelo (tomados del ejemplo Python)
   static constexpr float VCC = 3.3f;     // Voltaje de referencia
@@ -28,9 +23,9 @@ private:
   static constexpr float RL10 = 50.0f;   // kΩ a 10 lux -> usar 50 (kΩ) como en Python
   static constexpr float GAMMA = 0.7f;
 
-  float luxValue;      // valor actual de lux
-  float alpha;         // factor EMA (smoothing), 0=no smoothing, 1=solo nueva lectura
-
+  float luxValue;
+  float alpha;
+  
   // Helpers
   float adcToVoltage(int adc) const;
   float voltageToResistance(float voltage) const;

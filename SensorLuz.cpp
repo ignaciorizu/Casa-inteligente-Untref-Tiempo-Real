@@ -1,11 +1,9 @@
 #include "SensorLuz.h"
 
-SensorLuz::SensorLuz(int pinLDR_, int pinLED_, const char* nombreZona)
-  : ldrPin(pinLDR_), ledPin(pinLED_), nombre(nombreZona), luxValue(NAN), alpha(0.2f)
+SensorLuz::SensorLuz(int pinLDR_, int pinLED_, const char* nombreZona, ConfigManager& cfg)
+  : ldrPin(pinLDR_), ledPin(pinLED_), nombre(nombreZona), luxValue(NAN), alpha(0.2f), config(cfg) 
 {
-  // En ESP32 analogRead funciona en pines ADC (ej: 32, 33, 34 dependiente del board)
   pinMode(ledPin, OUTPUT);
-  // No se hace pinMode(ldrPin, INPUT) para ADC; analogRead ya lo maneja
 }
 
 // Convierte ADC (0..4095) a voltaje (0..VCC)
@@ -39,29 +37,20 @@ void SensorLuz::actualizar() {
   int adc = analogRead(ldrPin);         // 0..4095
   float v = adcToVoltage(adc);          // V
   float r_ldr = voltageToResistance(v); // ohmios
-  float lux = resistanceToLux(r_ldr)/10;   // lux
+  float lux = resistanceToLux(r_ldr) / 10.0f;   // lux
 
   // Suavizado exponencial (EMA) para evitar ruido; alpha en [0..1]
-  if (isnan(luxValue)) luxValue = lux;
-  else luxValue = (alpha * lux) + (1.0f - alpha) * luxValue;
+  if (isnan(luxValue)) {
+    luxValue = lux;
+  } else {
+    luxValue = (alpha * lux) + (1.0f - alpha) * luxValue;
+  }
 
-  // Control del LED: si poca luz (lux < UMBRAL) -> ENCENDER
-  if (luxValue < UMBRAL_LUX) digitalWrite(ledPin, HIGH);
-  else digitalWrite(ledPin, LOW);
-
-  // Debug (puedes comentar en release)
-  Serial.print("[Luz ");
-  Serial.print(nombre);
-  Serial.print("] ADC=");
-  Serial.print(adc);
-  Serial.print(" V=");
-  Serial.print(v, 3);
-  Serial.print(" Rldr=");
-  Serial.print(r_ldr, 1);
-  Serial.print(" ohm Lux=");
-  Serial.print(luxValue, 1);
-  Serial.print(" -> LED ");
-  Serial.println(luxValue < UMBRAL_LUX ? "ON" : "OFF");
+  if (luxValue < config.getUmbralLux()) {
+    digitalWrite(ledPin, HIGH);
+  } else {
+    digitalWrite(ledPin, LOW);
+  }
 }
 
 float SensorLuz::getLux() const {

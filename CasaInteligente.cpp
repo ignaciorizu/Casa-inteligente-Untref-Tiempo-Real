@@ -45,6 +45,8 @@ CasaInteligente::CasaInteligente()
     : alarma(SPEAKER_PIN, LED_ALARM), ir(DATA_IR) 
 {
     instancia = this;
+    
+    config = new ConfigManager();
 
     // Crear sensores temperatura
     sensoresTemp[0] = new SensorTemperatura(DHT_ENTRADA, LED_THERM_ENTRADA);
@@ -56,9 +58,9 @@ CasaInteligente::CasaInteligente()
     ledCalefaccion[2] = LED_THERM_SALA;
 
     // Crear sensores luz
-    sensoresLuz[0] = new SensorLuz(LDR_ENTRADA, LED_LIGHT_ENTRADA, "Entrada");
-    sensoresLuz[1] = new SensorLuz(LDR_PASILLO, LED_LIGHT_PASILLO, "Pasillo");
-    sensoresLuz[2] = new SensorLuz(LDR_SALA, LED_LIGHT_SALA, "Sala");
+    sensoresLuz[0] = new SensorLuz(LDR_ENTRADA, LED_LIGHT_ENTRADA, "Entrada", *config);
+    sensoresLuz[1] = new SensorLuz(LDR_PASILLO, LED_LIGHT_PASILLO, "Pasillo", *config);
+    sensoresLuz[2] = new SensorLuz(LDR_SALA, LED_LIGHT_SALA, "Sala", *config);
 
     ledIluminacion[0] = LED_LIGHT_ENTRADA;
     ledIluminacion[1] = LED_LIGHT_PASILLO;
@@ -89,7 +91,6 @@ void CasaInteligente::iniciar() {
 
     // IR
     ir.begin();
-    config = new ConfigManager();
 
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));

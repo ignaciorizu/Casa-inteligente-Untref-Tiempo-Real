@@ -89,7 +89,7 @@ void CasaInteligente::iniciar() {
 
     // IR
     ir.begin();
-    config = new ConfigManager(&pantalla);
+    config = new ConfigManager();
 
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));
@@ -134,9 +134,11 @@ void CasaInteligente::TaskLCD(void* pv) {
             continue;
         }
         
-        if (casa->mostrarConfigFlag) {
-            casa->pantalla.mostrarConfig(casa->configTitulo, casa->configValor);
-            vTaskDelay(500); 
+        if (casa->config->enMenu()) {
+            casa->pantalla.limpiar();
+            casa->pantalla.escribirLinea(0, casa->config->getTextoOpcion());
+            casa->pantalla.escribirLinea(1, String(casa->config->getValorActual()));
+            vTaskDelay(350);
             continue;
         }
 
@@ -152,7 +154,7 @@ void CasaInteligente::TaskLCD(void* pv) {
 
         indice = (indice + 1) % 3;
 
-        vTaskDelay(500  / portTICK_PERIOD_MS);
+        vTaskDelay(200  / portTICK_PERIOD_MS);
     }
 }
 
@@ -169,19 +171,19 @@ void CasaInteligente::TaskIR(void* pv) {
             uint32_t code = casa->ir.getLastCode();
             casa->ir.resume();
 
-            if (code == 0x5DA2FF00) {
-                casa->mostrarConfigFlag = !casa->mostrarConfigFlag;
+            IRButton boton = decodeButton(code);
+
+            if (boton == IR_POWER) {
+                casa->config->setModoConfig(!casa->config->enMenu());
             }
 
-            casa->config->procesarCodigoIR(code);
-            casa->configTitulo = casa->ir.getLastCode();
-            casa->configValor = casa->config->obtenerNombre(casa->ir.getLastCode());
+            if (casa->config->enMenu()) {
+                casa->config->procesarCodigoIR(boton);
+            }
         }
-
-        vTaskDelay(50 / portTICK_PERIOD_MS);
+        vTaskDelay(80 / portTICK_PERIOD_MS);
     }
 }
-
 
 
 // ==================================================

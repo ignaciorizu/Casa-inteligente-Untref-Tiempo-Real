@@ -13,6 +13,7 @@
 #include "PantallaLCD.h"
 #include "IRManager.h"
 #include "ConfigManager.h"
+#include "IRCodes.h"
 
 #define CANT_HABITACIONES 3
 

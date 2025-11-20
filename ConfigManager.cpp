@@ -1,69 +1,99 @@
 #include "ConfigManager.h"
-#include "PantallaLCD.h"
 
-// Tabla de códigos → nombres
-static std::map<uint32_t, const char*> tablaCodigos = {
-    {0x5DA2FF00, "POWER     "},
-    {0x1DE2FF00, "MENU      "},
-    {0xDD22FF00, "TEST      "},
-    {0xFD02FF00, "+         "},
-    {0x3DC2FF00, "BACK      "},
-    {0x1FE0FF00, "RETROCEDER"},
-    {0x57A8FF00, "PLAY      "},
-    {0x6F90FF00, "ADELANTAR "},
-    {0x9768FF00, "0         "},
-    {0x6798FF00, "-         "},
-    {0x4FB0FF00, "C         "},
-    {0xCF30FF00, "1         "},
-    {0xE718FF00, "2         "},
-    {0x857AFF00, "3         "},
-    {0xEF10FF00, "4         "},
-    {0xC738FF00, "5         "},
-    {0xA55AFF00, "6         "},
-    {0xBD42FF00, "7         "},
-    {0xB54AFF00, "8         "},
-    {0xAD52FF00, "9         "}
-};
+ConfigManager::ConfigManager() {}
 
-
-ConfigManager::ConfigManager(PantallaLCD* lcd)
-    : pantalla(lcd) {}
-
-void ConfigManager::setModoConfiguracion(bool activo) {
+void ConfigManager::setModoConfig(bool activo) {
     modoConfiguracion = activo;
-
-    pantalla->limpiar();
-
-    if (activo) {
-        pantalla->escribirLinea(0, "MODO CONFIG");
-        pantalla->escribirLinea(1, "Esperando IR...");
-    } else {
-        pantalla->escribirLinea(0, "SALIR CONFIG");
-        pantalla->escribirLinea(1, " ");
-    }
+    opcionActual = 0;
 }
 
-bool ConfigManager::getModoConfiguracion() {
-    return modoConfiguracion;
-}
-
-
-void ConfigManager::procesarCodigoIR(uint32_t code) {
+void ConfigManager::procesarCodigoIR(IRButton boton) {
     if (!modoConfiguracion) return;
 
-    pantalla->limpiar();
+    switch (boton) {
 
-    char linea1[20];
-    sprintf(linea1, "CODIGO:%08lX", code);
+        case IR_ADELANTAR:
+            opcionActual++;
+            if (opcionActual > 2) {
+                opcionActual = 0;
+            } 
+            break;
 
-    pantalla->escribirLinea(0, linea1);
-    pantalla->escribirLinea(1, obtenerNombre(code));
+        case IR_RETROCEDER:
+            if (opcionActual == 0) {
+                opcionActual = 2;
+            } else {
+                opcionActual--;
+            }
+            break;
+
+        case IR_MAS:
+            incrementarValor();
+            break;
+
+        case IR_MENOS:
+            decrementarValor();
+            break;
+
+        default:
+            break;
+    }
 }
 
-
-const char* ConfigManager::obtenerNombre(uint32_t code) {
-    if (tablaCodigos.count(code)) {
-        return tablaCodigos[code];
+void ConfigManager::incrementarValor() {
+    switch (opcionActual) {
+        case 0: 
+            if (tempMin < 45.0) {
+                tempMin += 0.5;
+            } 
+            break;
+        case 1: 
+            if (tempMax < 45.0) {
+                tempMax += 0.5;
+            } 
+            break;
+        case 2: 
+            if (umbralLux < 9950) {
+                umbralLux += 50;
+            }
+            break;
     }
-    return "DESCONOCIDO";
+}
+
+void ConfigManager::decrementarValor() {
+    switch (opcionActual) {
+        case 0: 
+            if (tempMin > 0.0) {
+                tempMin -= 0.5;
+            }
+            break;
+        case 1: 
+            if (tempMax > 0.0) {
+                tempMax -= 0.5;
+            }
+            break;
+        case 2: 
+            if (umbralLux > 1) {
+                umbralLux -= 50;
+            }
+            break;
+    }
+}
+
+String ConfigManager::getTextoOpcion() const {
+    switch (opcionActual) {
+        case 0: return "Temp Min (°C)";
+        case 1: return "Temp Max (°C)";
+        case 2: return "Umbral Luz";
+        default: return "";
+    }
+}
+
+String ConfigManager::getValorActual() const {
+    switch (opcionActual) {
+        case 0: return String(tempMin, 1);
+        case 1: return String(tempMax, 1);
+        case 2: return String(umbralLux);
+        default: return "";
+    }
 }

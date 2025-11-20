@@ -58,7 +58,7 @@
       "id": "dht5",
       "top": 422.7,
       "left": 244.2,
-      "attrs": { "temperature": "0.2" }
+      "attrs": { "temperature": "28.8" }
     },
     {
       "type": "wokwi-dht22",

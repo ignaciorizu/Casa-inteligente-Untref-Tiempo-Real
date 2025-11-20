@@ -3,23 +3,33 @@
 
 #include <Arduino.h>
 #include <map>
-
-class PantallaLCD;
+#include "IRCodes.h"
 
 class ConfigManager {
 public:
-    ConfigManager(PantallaLCD* lcd);
+    ConfigManager();
 
-    void setModoConfiguracion(bool activo);
-    bool getModoConfiguracion();
+    void procesarCodigoIR(IRButton boton);
 
-    void procesarCodigoIR(uint32_t code);
-    
-    const char* obtenerNombre(uint32_t code);
+    bool enMenu() const { return modoConfiguracion; }
+    int getOpcion() const { return opcionActual; }
+    String getTextoOpcion() const;
+    String getValorActual() const;
+
+    // Activar/Desactivar menú
+    void setModoConfig(bool activo);
 
 private:
+    void incrementarValor();
+    void decrementarValor();
+
     bool modoConfiguracion = false;
-    PantallaLCD* pantalla;
+    int opcionActual = 0; // 0=min temp, 1=max temp, 2=umbral luz
+
+    // Valores internos (simulados)
+    float tempMin = 20.0;
+    float tempMax = 24.0;
+    float umbralLux = 300.0;
 };
 
 #endif

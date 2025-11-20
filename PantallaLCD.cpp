@@ -46,8 +46,11 @@ void PantallaLCD::mostrarHabitacion(const String &nombre,
 
     lcd.setCursor(0,2);
     lcd.print("Iluminacion: ");
+    if (lux >= 10000) {
+        lux = 9999;
+    }
     lcd.print(lux);
-    lcd.print(" lux");
+    lcd.print(" lx");
     
     lcd.setCursor(0,3);
     lcd.print("Luz: ");

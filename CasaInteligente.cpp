@@ -49,9 +49,9 @@ CasaInteligente::CasaInteligente()
     config = new ConfigManager();
 
     // Crear sensores temperatura
-    sensoresTemp[0] = new SensorTemperatura(DHT_ENTRADA, LED_THERM_ENTRADA);
-    sensoresTemp[1] = new SensorTemperatura(DHT_PASILLO, LED_THERM_PASILLO);
-    sensoresTemp[2] = new SensorTemperatura(DHT_SALA, LED_THERM_SALA);
+    sensoresTemp[0] = new SensorTemperatura(DHT_ENTRADA, LED_THERM_ENTRADA, *config);
+    sensoresTemp[1] = new SensorTemperatura(DHT_PASILLO, LED_THERM_PASILLO, *config);
+    sensoresTemp[2] = new SensorTemperatura(DHT_SALA, LED_THERM_SALA, *config);
 
     ledCalefaccion[0] = LED_THERM_ENTRADA;
     ledCalefaccion[1] = LED_THERM_PASILLO;
@@ -202,11 +202,6 @@ void CasaInteligente::TaskTemp(void* pv) {
 
             float t = casa->sensoresTemp[i]->getTemperatura();
             int led = casa->ledCalefaccion[i];
-
-            if (!isnan(t)) {
-                if (t < 20.0) digitalWrite(led, HIGH);
-                else if (t > 24.0) digitalWrite(led, LOW);
-            }
 
             casa->estadoPantalla.temp[i] = t;
             casa->estadoPantalla.calefaccion[i] = digitalRead(casa->ledCalefaccion[i]);

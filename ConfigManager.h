@@ -21,6 +21,7 @@ public:
     void decrementarValor();
     
     int getUmbralLux() const { return umbralLux; }
+    int getTempMin() const { return tempMin; }
 
 private:
     bool modoConfiguracion = false;

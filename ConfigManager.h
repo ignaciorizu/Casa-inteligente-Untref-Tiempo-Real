@@ -22,6 +22,7 @@ public:
     
     int getUmbralLux() const { return umbralLux; }
     int getTempMin() const { return tempMin; }
+    int getTempMax() const { return tempMax; }
 
 private:
     bool modoConfiguracion = false;

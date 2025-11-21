@@ -113,3 +113,13 @@ String ConfigManager::getValorActual() const {
         default: return "";
     }
 }
+
+void ConfigManager::guardarEnMemoria() {
+    prefs.begin("config", false);  // false = escribe
+
+    prefs.putFloat("tMin", tempMin);
+    prefs.putFloat("tMax", tempMax);
+    prefs.putUInt("lux", (unsigned int)umbralLux);
+
+    prefs.end();
+}

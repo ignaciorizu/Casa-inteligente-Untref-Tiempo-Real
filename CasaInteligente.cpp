@@ -165,6 +165,7 @@ void CasaInteligente::TaskLCD(void* pv) {
 // ==================================================
 void CasaInteligente::TaskIR(void* pv) {
     auto* casa = CasaInteligente::instancia;
+    bool estabaEnMenu = false;
 
     while (1) {
 
@@ -175,7 +176,12 @@ void CasaInteligente::TaskIR(void* pv) {
             IRButton boton = decodeButton(code);
 
             if (boton == IR_POWER) {
-                casa->config->setModoConfig(!casa->config->enMenu());
+                bool nuevoEstado = !casa->config->enMenu();
+                casa->config->setModoConfig(nuevoEstado);
+
+                if (estabaEnMenu && !nuevoEstado) {
+                    casa->config->guardarEnMemoria();
+                }
             }
 
             if (casa->config->enMenu()) {

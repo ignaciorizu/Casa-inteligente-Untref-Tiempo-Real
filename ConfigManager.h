@@ -2,7 +2,7 @@
 #define CONFIG_MANAGER_H
 
 #include <Arduino.h>
-#include <map>
+#include <Preferences.h>
 #include "IRCodes.h"
 
 class ConfigManager {
@@ -24,6 +24,8 @@ public:
     int getTempMin() const { return tempMin; }
     int getTempMax() const { return tempMax; }
 
+    void guardarEnMemoria();
+
 private:
     bool modoConfiguracion = false;
     int opcionActual = 0; // 0=min temp, 1=max temp, 2=umbral luz
@@ -31,6 +33,8 @@ private:
     float tempMin = 20.0;
     float tempMax = 24.0;
     float umbralLux = 100.0;
+
+    Preferences prefs;
 };
 
 #endif

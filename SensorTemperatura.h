@@ -18,6 +18,7 @@ class SensorTemperatura {
     DHT dht;
     int ledPin;
     float ultimaTemp;
+    int ultimoEstadoLED = LOW;
 };
 
 

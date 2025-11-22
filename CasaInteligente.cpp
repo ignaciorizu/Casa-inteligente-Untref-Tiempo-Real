@@ -77,7 +77,8 @@ CasaInteligente::CasaInteligente()
 //                 INICIAR EL SISTEMA
 // ==================================================
 void CasaInteligente::iniciar() {
-    // LEDs calefacción
+    auto* casa = CasaInteligente::instancia;
+
     for (int i = 0; i < CANT_HABITACIONES; i++) {
         pinMode(ledCalefaccion[i], OUTPUT);
     }
@@ -91,6 +92,8 @@ void CasaInteligente::iniciar() {
 
     // IR
     ir.begin();
+    config->cargarDesdeMemoria(); 
+    casa->pantalla.mostrarCargado();
 
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));
@@ -142,6 +145,12 @@ void CasaInteligente::TaskLCD(void* pv) {
             vTaskDelay(350);
             continue;
         }
+        
+        if (casa->mensajeDeGuardado) {
+            casa->mensajeDeGuardado = false;
+            casa->pantalla.mostrarGuardado();
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+        }
 
         const char* nombres[] = {"Entrada", "Pasillo", "Sala"};
 
@@ -175,19 +184,25 @@ void CasaInteligente::TaskIR(void* pv) {
 
             IRButton boton = decodeButton(code);
 
-            if (boton == IR_POWER) {
+            if (boton == IR_MENU) {
                 bool nuevoEstado = !casa->config->enMenu();
                 casa->config->setModoConfig(nuevoEstado);
 
                 if (estabaEnMenu && !nuevoEstado) {
                     casa->config->guardarEnMemoria();
+                    casa->mensajeDeGuardado = true;
                 }
+            }
+
+            if (boton == IR_POWER) {
+                ESP.restart();
             }
 
             if (casa->config->enMenu()) {
                 casa->config->procesarCodigoIR(boton);
             }
         }
+        estabaEnMenu = casa->config->enMenu();
         vTaskDelay(80 / portTICK_PERIOD_MS);
     }
 }

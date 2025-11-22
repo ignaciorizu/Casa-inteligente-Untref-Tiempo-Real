@@ -5,11 +5,7 @@
 #include <LiquidCrystal_I2C.h>
 
 class PantallaLCD {
-
-private:
-    LiquidCrystal_I2C lcd;
-
-public:
+  public:
     PantallaLCD(uint8_t address = 0x27, uint8_t cols = 20, uint8_t rows = 4);
 
     void iniciar();
@@ -26,6 +22,12 @@ public:
     void mostrarAlarma(const String &zona);
     
     void mostrarConfig(const String &titulo, const String &valor);
+    
+    void mostrarGuardado();
+    void mostrarCargado();
+
+  private:
+    LiquidCrystal_I2C lcd;
 };
 
 #endif

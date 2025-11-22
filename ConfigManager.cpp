@@ -114,12 +114,26 @@ String ConfigManager::getValorActual() const {
     }
 }
 
-void ConfigManager::guardarEnMemoria() {
-    prefs.begin("config", false);  // false = escribe
 
+void ConfigManager::guardarEnMemoria() {
+    prefs.begin("config", false);
     prefs.putFloat("tMin", tempMin);
     prefs.putFloat("tMax", tempMax);
     prefs.putUInt("lux", (unsigned int)umbralLux);
+    prefs.end();
+}
+
+void ConfigManager::cargarDesdeMemoria() {
+    prefs.begin("config", true);
+
+    float vMin = prefs.getFloat("tMin", tempMin);
+    float vMax = prefs.getFloat("tMax", tempMax);
+    unsigned int vLux = prefs.getUInt("lux", (unsigned int)umbralLux);
 
     prefs.end();
+
+    // Validaciones
+    if (vMin > 0 && vMin < 50) tempMin = vMin;
+    if (vMax > 0 && vMax < 50) tempMax = vMax;
+    if (vLux > 0 && vLux < 20000) umbralLux = vLux;
 }

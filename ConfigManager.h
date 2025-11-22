@@ -25,6 +25,7 @@ public:
     int getTempMax() const { return tempMax; }
 
     void guardarEnMemoria();
+    void cargarDesdeMemoria();
 
 private:
     bool modoConfiguracion = false;

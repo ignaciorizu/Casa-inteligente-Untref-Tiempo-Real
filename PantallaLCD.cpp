@@ -81,3 +81,27 @@ void PantallaLCD::mostrarConfig(const String &titulo, const String &valor) {
     lcd.setCursor(0,3);
     lcd.print(valor);
 }
+
+void PantallaLCD::mostrarGuardado() {
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("Guardando...");
+    delay(700);
+
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("CONFIG GUARDADA");
+    delay(1000);
+}
+
+void PantallaLCD::mostrarCargado() {
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("Cargando...");
+    delay(700);
+
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("CONFIG CARGADA");
+    delay(1000);
+}

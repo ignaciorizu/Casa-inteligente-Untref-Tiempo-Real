@@ -47,10 +47,13 @@ private:
     int ledCalefaccion[CANT_HABITACIONES];
     int ledIluminacion[CANT_HABITACIONES];
 
-    //Configuracion de datos
+    // Configuracion de datos
     bool mostrarConfigFlag = false;
     String configTitulo = "";
     String configValor = "";
+    
+    // Guardar datos
+    bool mensajeDeGuardado = false; 
 
 public:
     CasaInteligente();

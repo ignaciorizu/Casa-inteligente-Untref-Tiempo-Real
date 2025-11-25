@@ -7,37 +7,37 @@
 echo "🏠 COMPILANDO Y EJECUTANDO TESTS DE CASA INTELIGENTE"
 echo "==================================================="
 
-# Detectar el sistema operativo y configurar rutas
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
+# Detectar el sistema operativo - ESTO FUNCIONA PARA AMBOS ENTORNOS
+if [[ "$OSTYPE" == "linux-gnu"* || "$RUNNER_OS" == "Linux" ]]; then
+    # Linux (GitHub Actions o local)
     CXX="${CXX:-g++}"
     INCLUDES="-I. -I./test -I./test/mocks -I/usr/include"
     LIBS="-lgtest -lgtest_main -pthread"
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    # Windows (MSYS2)
+    echo "🔧 Sistema: Linux"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$RUNNER_OS" == "Windows" ]]; then
+    # Windows (solo local en tu máquina)
     CXX="${CXX:-g++}"
     INCLUDES="-I. -I./test -I./test/mocks -IC:/msys64/mingw64/include"
     LIBS="-LC:/msys64/mingw64/lib -lgtest -lgtest_main -static"
+    echo "🔧 Sistema: Windows (local)"
 else
     # macOS u otros
     CXX="${CXX:-g++}"
     INCLUDES="-I. -I./test -I./test/mocks"
     LIBS="-lgtest -lgtest_main -pthread"
+    echo "🔧 Sistema: Otro ($OSTYPE)"
 fi
+
+# Mostrar información del compilador
+echo "🔧 Compilador: $CXX"
+$CXX --version || echo "⚠️ No se pudo obtener versión del compilador"
 
 CXXFLAGS="-std=c++17 -DUNIT_TEST -g -Wall"
 MOCKS_FILE="test/mocks.cpp"
 
-# Archivos de componentes principales (puedes expandir esta lista)
+# Archivos de componentes principales
 COMPONENTS=(
     "Alarma"
-    # "ConfigManager"
-    # "SensorTemperatura"
-    # "SensorLuz"
-    # "SensorMovimiento"
-    # "PantallaLCD"
-    # "IRManager"
-    # "CasaInteligente"
 )
 
 # Función para imprimir mensajes
@@ -96,16 +96,18 @@ done
 # Tests a ejecutar
 TESTS=(
     "test_alarma"
-    # "test_config_manager"
-    # "test_sensores"
-    # "test_pantalla"
-    # "test_ir_manager"
-    # "test_casa_inteligente"
 )
 
 TEST_RESULTS=()
 for test_file in "${TESTS[@]}"; do
     print_step "Compilando $test_file..."
+
+    # Verificar que existe el archivo de test
+    if [ ! -f "./test/tests/${test_file}.cpp" ]; then
+        echo "❌ Archivo de test no encontrado: ./test/tests/${test_file}.cpp"
+        TEST_RESULTS+=("${test_file}:FILE_NOT_FOUND")
+        continue
+    fi
 
     # Compilar test
     $CXX $CXXFLAGS $INCLUDES -c "./test/tests/${test_file}.cpp" -o "${test_file}.o"
@@ -130,12 +132,17 @@ for test_file in "${TESTS[@]}"; do
 
     # Ejecutar test
     print_step "Ejecutando $test_file..."
-    if ./"$OUTPUT_FILE" --gtest_output="xml:${test_file}_results.xml"; then
-        echo "✅ $test_file: PASÓ"
-        TEST_RESULTS+=("${test_file}:PASS")
+    if [ -f "./$OUTPUT_FILE" ]; then
+        if ./"$OUTPUT_FILE" --gtest_output="xml:${test_file}_results.xml"; then
+            echo "✅ $test_file: PASÓ"
+            TEST_RESULTS+=("${test_file}:PASS")
+        else
+            echo "❌ $test_file: FALLÓ (código: $?)"
+            TEST_RESULTS+=("${test_file}:FAIL")
+        fi
     else
-        echo "❌ $test_file: FALLÓ (código: $?)"
-        TEST_RESULTS+=("${test_file}:FAIL")
+        echo "❌ $test_file: Ejecutable no encontrado"
+        TEST_RESULTS+=("${test_file}:EXE_NOT_FOUND")
     fi
 done
 
@@ -154,9 +161,11 @@ echo "🚀 PROCESO DE TESTING COMPLETADO"
 
 # Retornar código de error si algún test falló
 for result in "${TEST_RESULTS[@]}"; do
-    if [[ $result == *":FAIL"* || $result == *":COMPILATION_FAILED"* || $result == *":LINK_FAILED"* ]]; then
+    if [[ $result == *":FAIL"* || $result == *":COMPILATION_FAILED"* || $result == *":LINK_FAILED"* || $result == *":FILE_NOT_FOUND"* || $result == *":EXE_NOT_FOUND"* ]]; then
+        echo "❌ ALGUNOS TESTS FALLARON"
         exit 1
     fi
 done
 
+echo "✅ TODOS LOS TESTS PASARON"
 exit 0

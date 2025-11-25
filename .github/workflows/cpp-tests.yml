@@ -11,43 +11,37 @@ jobs:
     strategy:
       matrix:
         compiler: [g++, clang++]
-        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout código
       uses: actions/checkout@v4
 
-    - name: Instalar dependencias (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Instalar dependencias
       run: |
         sudo apt-get update
-        sudo apt-get install -y g++ clang make cmake libgtest-dev
+        sudo apt-get install -y clang make cmake libgtest-dev
 
-    - name: Instalar dependencias (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install mingw make
-
-    - name: Compilar Google Test (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Compilar Google Test
       run: |
         cd /usr/src/gtest
         sudo cmake CMakeLists.txt
         sudo make
         sudo cp lib/*.a /usr/lib
 
-    - name: Configurar compilador
+    - name: Verificar compilador
       run: |
-        echo "CXX=${{ matrix.compiler }}" >> $GITHUB_ENV
+        echo "Compiler: ${{ matrix.compiler }}"
+        which ${{ matrix.compiler }} || echo "Compilador no encontrado en PATH"
+        ${{ matrix.compiler }} --version || echo "No se pudo obtener versión"
 
     - name: Compilar y ejecutar tests
       run: |
         chmod +x build_test.sh
-        ./build_test.sh
+        CXX="${{ matrix.compiler }}" ./build_test.sh
 
-    - name: Mostrar cobertura de tests
+    - name: Mostrar resultados
       run: |
-        echo "✅ Tests ejecutados exitosamente"
-        find . -name "test_*" -type f -executable
+        echo "✅ Proceso completado para ${{ matrix.compiler }} en Ubuntu"

@@ -1,8 +1,13 @@
 #ifndef PANTALLA_LCD_H
 #define PANTALLA_LCD_H
 
-#include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
+#ifdef UNIT_TEST
+    #include "./test/mocks/ArduinoMock.h"
+    #include "./test/mocks/HardwareMock.h"
+#else
+    #include <Arduino.h>
+    #include <LiquidCrystal_I2C.h>
+#endif
 
 class PantallaLCD {
   public:
@@ -12,17 +17,13 @@ class PantallaLCD {
     void limpiar();
     void mostrarInicio();
     void escribirLinea(int linea, const String &nombre);
-
     void mostrarHabitacion(const String &nombre,
                            float temperatura,
                            bool calefactorEncendido,
                            int lux,
                            bool luzEncendida);
-
     void mostrarAlarma(const String &zona);
-    
     void mostrarConfig(const String &titulo, const String &valor);
-    
     void mostrarGuardado();
     void mostrarCargado();
 

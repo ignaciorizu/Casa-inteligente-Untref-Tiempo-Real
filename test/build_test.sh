@@ -31,13 +31,7 @@ MOCKS_FILE="test/mocks.cpp"
 # Archivos de componentes principales (puedes expandir esta lista)
 COMPONENTS=(
     "Alarma"
-    # "ConfigManager"
-    # "SensorTemperatura"
-    # "SensorLuz"
-    # "SensorMovimiento"
-    # "PantallaLCD"
-    # "IRManager"
-    # "CasaInteligente"
+    "PantallaLCD"
 )
 
 # Función para imprimir mensajes
@@ -96,11 +90,7 @@ done
 # Tests a ejecutar
 TESTS=(
     "test_alarma"
-    # "test_config_manager"
-    # "test_sensores"
-    # "test_pantalla"
-    # "test_ir_manager"
-    # "test_casa_inteligente"
+    "test_pantalla"
 )
 
 TEST_RESULTS=()

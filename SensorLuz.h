@@ -1,7 +1,12 @@
 #ifndef SENSOR_LUZ_H
 #define SENSOR_LUZ_H
 
-#include <Arduino.h>
+#ifdef UNIT_TEST
+    #include "./test/mocks/ArduinoMock.h"
+#else
+    #include <Arduino.h>
+#endif
+
 #include "ConfigManager.h"
 
 class SensorLuz {
@@ -25,7 +30,7 @@ private:
 
   float luxValue;
   float alpha;
-  
+
   // Helpers
   float adcToVoltage(int adc) const;
   float voltageToResistance(float voltage) const;

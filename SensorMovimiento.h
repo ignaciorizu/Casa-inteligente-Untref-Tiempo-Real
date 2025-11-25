@@ -1,7 +1,11 @@
 #ifndef SENSOR_MOVIMIENTO_H
 #define SENSOR_MOVIMIENTO_H
 
-#include <Arduino.h>
+#ifdef UNIT_TEST
+    #include "./test/mocks/ArduinoMock.h"
+#else
+    #include <Arduino.h>
+#endif
 
 class SensorMovimiento {
 private:

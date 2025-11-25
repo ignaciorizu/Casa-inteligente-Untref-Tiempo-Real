@@ -1,7 +1,16 @@
 #include "SensorLuz.h"
 
+#ifdef UNIT_TEST
+    #include <cmath>
+#endif
+
 SensorLuz::SensorLuz(int pinLDR_, int pinLED_, const char* nombreZona, ConfigManager& cfg)
-  : ldrPin(pinLDR_), ledPin(pinLED_), nombre(nombreZona), luxValue(NAN), alpha(0.2f), config(cfg) 
+  : ldrPin(pinLDR_),
+    ledPin(pinLED_),
+    nombre(nombreZona),
+    config(cfg),
+    luxValue(NAN),
+    alpha(0.2f)
 {
   pinMode(ledPin, OUTPUT);
 }
@@ -40,7 +49,11 @@ void SensorLuz::actualizar() {
   float lux = resistanceToLux(r_ldr) / 10.0f;   // lux
 
   // Suavizado exponencial (EMA) para evitar ruido; alpha en [0..1]
+  #ifdef UNIT_TEST
+  if (std::isnan(luxValue)) {
+  #else
   if (isnan(luxValue)) {
+  #endif
     luxValue = lux;
   } else {
     luxValue = (alpha * lux) + (1.0f - alpha) * luxValue;

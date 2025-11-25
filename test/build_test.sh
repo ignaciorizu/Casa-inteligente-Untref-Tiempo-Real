@@ -7,17 +7,37 @@
 echo "🏠 COMPILANDO Y EJECUTANDO TESTS DE CASA INTELIGENTE"
 echo "==================================================="
 
-# Configuración específica para MSYS2 (igual que tu ejemplo funcionando)
-CXX="g++"
-CXXFLAGS="-std=c++17 -DUNIT_TEST"
-INCLUDES="-I. -I./test -I./test/mocks -IC:/msys64/mingw64/include"
-LIBS="-LC:/msys64/mingw64/lib -lgtest -lgtest_main -static"
-MOCKS_FILE="test/mocks.cpp"
-OUTPUT_PREFIX="test"
+# Detectar el sistema operativo y configurar rutas
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux
+    CXX="${CXX:-g++}"
+    INCLUDES="-I. -I./test -I./test/mocks -I/usr/include"
+    LIBS="-lgtest -lgtest_main -pthread"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    # Windows (MSYS2)
+    CXX="${CXX:-g++}"
+    INCLUDES="-I. -I./test -I./test/mocks -IC:/msys64/mingw64/include"
+    LIBS="-LC:/msys64/mingw64/lib -lgtest -lgtest_main -static"
+else
+    # macOS u otros
+    CXX="${CXX:-g++}"
+    INCLUDES="-I. -I./test -I./test/mocks"
+    LIBS="-lgtest -lgtest_main -pthread"
+fi
 
-# Archivos de componentes principales
+CXXFLAGS="-std=c++17 -DUNIT_TEST -g -Wall"
+MOCKS_FILE="test/mocks.cpp"
+
+# Archivos de componentes principales (puedes expandir esta lista)
 COMPONENTS=(
     "Alarma"
+    # "ConfigManager"
+    # "SensorTemperatura"
+    # "SensorLuz"
+    # "SensorMovimiento"
+    # "PantallaLCD"
+    # "IRManager"
+    # "CasaInteligente"
 )
 
 # Función para imprimir mensajes
@@ -49,9 +69,9 @@ check_file "./test/mocks.cpp" || exit 1
 # Limpiar compilaciones anteriores
 print_step "Limpiando compilaciones anteriores..."
 rm -f *.o
-rm -f ${OUTPUT_PREFIX}_*
+rm -f test_*
 
-# Compilar mocks (igual que tu ejemplo funcionando)
+# Compilar mocks
 print_step "Compilando mocks..."
 $CXX $CXXFLAGS $INCLUDES -c "./test/mocks.cpp" -o mocks.o
 if [ $? -ne 0 ]; then
@@ -73,11 +93,17 @@ for comp in "${COMPONENTS[@]}"; do
     echo "✅ $comp compilado"
 done
 
-# Tests a ejecutar (empezamos solo con test_alarma)
+# Tests a ejecutar
 TESTS=(
     "test_alarma"
+    # "test_config_manager"
+    # "test_sensores"
+    # "test_pantalla"
+    # "test_ir_manager"
+    # "test_casa_inteligente"
 )
 
+TEST_RESULTS=()
 for test_file in "${TESTS[@]}"; do
     print_step "Compilando $test_file..."
 
@@ -85,54 +111,52 @@ for test_file in "${TESTS[@]}"; do
     $CXX $CXXFLAGS $INCLUDES -c "./test/tests/${test_file}.cpp" -o "${test_file}.o"
     if [ $? -ne 0 ]; then
         echo "❌ Error compilando $test_file"
+        TEST_RESULTS+=("${test_file}:COMPILATION_FAILED")
         continue
     fi
     echo "✅ $test_file compilado"
 
-    # Enlazar (igual que tu ejemplo funcionando)
+    # Enlazar
     print_step "Enlazando $test_file..."
-    OUTPUT_FILE="${test_file}.exe"
+    OUTPUT_FILE="test_${test_file}"
 
     $CXX "${test_file}.o" $OBJECT_FILES $LIBS -o "$OUTPUT_FILE"
     if [ $? -ne 0 ]; then
         echo "❌ Error enlazando $test_file"
-        echo "Probando enlazado alternativo..."
-        # Intentar sin rutas específicas (igual que tu ejemplo)
-        $CXX "${test_file}.o" $OBJECT_FILES -lgtest -lgtest_main -o "$OUTPUT_FILE"
-        if [ $? -ne 0 ]; then
-            echo "💥 Error crítico en enlazado"
-            continue
-        fi
+        TEST_RESULTS+=("${test_file}:LINK_FAILED")
+        continue
     fi
     echo "✅ $test_file enlazado"
 
-    # Verificar que el ejecutable se creó
-    if [ ! -f "$OUTPUT_FILE" ]; then
-        echo "❌ ERROR: No se pudo crear el ejecutable $OUTPUT_FILE"
-        continue
-    fi
-
     # Ejecutar test
-    echo ""
-    echo "🧪 EJECUTANDO: $test_file"
-    echo "=========================================="
-    chmod +x "$OUTPUT_FILE"
-    if ./"$OUTPUT_FILE"; then
+    print_step "Ejecutando $test_file..."
+    if ./"$OUTPUT_FILE" --gtest_output="xml:${test_file}_results.xml"; then
         echo "✅ $test_file: PASÓ"
+        TEST_RESULTS+=("${test_file}:PASS")
     else
         echo "❌ $test_file: FALLÓ (código: $?)"
+        TEST_RESULTS+=("${test_file}:FAIL")
     fi
-    echo ""
 done
 
 # Mostrar resumen final
 echo ""
 echo "=========================================="
-echo "📊 RESUMEN FINAL"
+echo "📊 RESUMEN FINAL DE TESTS"
 echo "=========================================="
-echo "Ejecutables creados:"
-ls ${OUTPUT_PREFIX}_* 2>/dev/null || echo "Ninguno"
+for result in "${TEST_RESULTS[@]}"; do
+    echo "  $result"
+done
 
 echo ""
 echo "=========================================="
 echo "🚀 PROCESO DE TESTING COMPLETADO"
+
+# Retornar código de error si algún test falló
+for result in "${TEST_RESULTS[@]}"; do
+    if [[ $result == *":FAIL"* || $result == *":COMPILATION_FAILED"* || $result == *":LINK_FAILED"* ]]; then
+        exit 1
+    fi
+done
+
+exit 0

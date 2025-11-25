@@ -32,6 +32,10 @@ MOCKS_FILE="test/mocks.cpp"
 COMPONENTS=(
     "Alarma"
     "PantallaLCD"
+    "ConfigManager"
+    "SensorTemperatura"
+    "SensorLuz"
+    "SensorMovimiento"
 )
 
 # Función para imprimir mensajes
@@ -91,6 +95,7 @@ done
 TESTS=(
     "test_alarma"
     "test_pantalla"
+    "test_sensores"
 )
 
 TEST_RESULTS=()

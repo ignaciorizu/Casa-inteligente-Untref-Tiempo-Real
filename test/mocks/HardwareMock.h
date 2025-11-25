@@ -10,6 +10,10 @@
 #include <string>
 #include <cmath>
 
+// Definiciones para DHT
+#define DHT22 22
+#define DHT11 11
+
 // LiquidCrystal_I2C Mock
 class LiquidCrystal_I2C {
 private:
@@ -58,6 +62,37 @@ public:
         if(line >= 0 && line < 4) return buffer[line];
         return "";
     }
+};
+
+// DHT Mock
+class DHT {
+private:
+    int pin;
+    int type;
+    float temperature;
+    float humidity;
+
+public:
+    DHT(uint8_t pin, uint8_t type) : pin(pin), type(type), temperature(22.0), humidity(50.0) {}
+
+    void begin() {
+        std::cout << "DHT inicializado en pin " << pin << " (Tipo: " << type << ")" << std::endl;
+    }
+
+    float readTemperature(bool force = false) {
+        return temperature;
+    }
+
+    float readHumidity(bool force = false) {
+        return humidity;
+    }
+
+    // Para testing
+    float getTemperature() const { return temperature; }
+    float getHumidity() const { return humidity; }
+
+    void setTemperature(float temp) { temperature = temp; }
+    void setHumidity(float hum) { humidity = hum; }
 };
 
 #endif

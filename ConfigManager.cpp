@@ -116,21 +116,21 @@ String ConfigManager::getValorActual() const {
 
 
 void ConfigManager::guardarEnMemoria() {
-    prefs.begin("config", false);
-    prefs.putFloat("tMin", tempMin);
-    prefs.putFloat("tMax", tempMax);
-    prefs.putUInt("lux", (unsigned int)umbralLux);
-    prefs.end();
+    PREFS.begin("config", false);
+    PREFS.putFloat("tMin", tempMin);
+    PREFS.putFloat("tMax", tempMax);
+    PREFS.putUInt("lux", (unsigned int)umbralLux);
+    PREFS.end();
 }
 
 void ConfigManager::cargarDesdeMemoria() {
-    prefs.begin("config", true);
+    PREFS.begin("config", true);
 
-    float vMin = prefs.getFloat("tMin", tempMin);
-    float vMax = prefs.getFloat("tMax", tempMax);
-    unsigned int vLux = prefs.getUInt("lux", (unsigned int)umbralLux);
+    float vMin = PREFS.getFloat("tMin", tempMin);
+    float vMax = PREFS.getFloat("tMax", tempMax);
+    unsigned int vLux = PREFS.getUInt("lux", (unsigned int)umbralLux);
 
-    prefs.end();
+    PREFS.end();
 
     // Validaciones
     if (vMin > 0 && vMin < 50) tempMin = vMin;

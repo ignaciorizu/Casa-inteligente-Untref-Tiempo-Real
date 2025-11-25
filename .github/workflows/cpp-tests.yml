@@ -4,6 +4,12 @@ on:
   push:
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Rama de código a ejecutar'
+        required: true
+        default: 'main'
 
 jobs:
   test:

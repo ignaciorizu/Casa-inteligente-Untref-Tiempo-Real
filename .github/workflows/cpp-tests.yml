@@ -38,8 +38,8 @@ jobs:
 
     - name: Compilar y ejecutar tests
       run: |
-        chmod +x build_test.sh
-        CXX="${{ matrix.compiler }}" ./build_test.sh
+        chmod +x ./test/build_test.sh
+        CXX="${{ matrix.compiler }}" ./test/build_test.sh
 
     - name: Mostrar resultados
       run: |

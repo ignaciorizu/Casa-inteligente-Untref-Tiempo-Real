@@ -1,7 +1,11 @@
 #ifndef ALARMA_H
 #define ALARMA_H
 
-#include <Arduino.h>
+#ifdef UNIT_TEST
+    #include "./test/mocks/ArduinoMock.h"
+#else
+    #include <Arduino.h>
+#endif
 
 class Alarma {
 public:

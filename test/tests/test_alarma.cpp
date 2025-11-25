@@ -96,7 +96,7 @@ TEST_F(AlarmaTest, DeactivateTurnsOffHardware) {
     EXPECT_FALSE(alarma->estaActiva());
 
     // Verificar que noTone() limpió el estado
-    EXPECT_EQ(toneStates.count(26), 0);  // No debería haber frecuencia configurada
+    EXPECT_EQ(toneStates.count(26), 0u);  // No debería haber frecuencia configurada
 }
 
 TEST_F(AlarmaTest, MultipleUpdates) {

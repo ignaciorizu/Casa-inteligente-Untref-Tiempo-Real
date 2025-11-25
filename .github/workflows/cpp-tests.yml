@@ -1,0 +1,53 @@
+name: C++ Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Instalar dependencias (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ clang make cmake libgtest-dev
+
+    - name: Instalar dependencias (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install mingw make
+
+    - name: Compilar Google Test (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd /usr/src/gtest
+        sudo cmake CMakeLists.txt
+        sudo make
+        sudo cp lib/*.a /usr/lib
+
+    - name: Configurar compilador
+      run: |
+        echo "CXX=${{ matrix.compiler }}" >> $GITHUB_ENV
+
+    - name: Compilar y ejecutar tests
+      run: |
+        chmod +x build_test.sh
+        ./build_test.sh
+
+    - name: Mostrar cobertura de tests
+      run: |
+        echo "✅ Tests ejecutados exitosamente"
+        find . -name "test_*" -type f -executable

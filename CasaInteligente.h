@@ -26,6 +26,11 @@ struct EstadoPantalla {
   String alarmaHab = "";
 };
 
+enum EventoPantalla {
+    PANTALLA_NADA,
+    PANTALLA_LIMPIAR_ALARMA
+};
+
 class CasaInteligente {
 private:
     // Sensores
@@ -42,6 +47,7 @@ private:
 
     // Queue para botón
     QueueHandle_t botonQueue;
+    QueueHandle_t pantallaQueue;   
 
     // Pines
     int ledCalefaccion[CANT_HABITACIONES];

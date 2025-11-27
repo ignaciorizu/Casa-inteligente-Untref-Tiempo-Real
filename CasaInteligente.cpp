@@ -97,6 +97,7 @@ void CasaInteligente::iniciar() {
 
     // Botón alarma
     botonQueue = xQueueCreate(5, sizeof(int));
+    pantallaQueue = xQueueCreate(5, sizeof(int)); 
     pinMode(BOTON_APAGADO_ALARMA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(BOTON_APAGADO_ALARMA), botonISR, FALLING);
 }
@@ -129,8 +130,16 @@ void CasaInteligente::TaskLCD(void* pv) {
     auto* casa = CasaInteligente::instancia;
 
     int indice = 0;
+    int eventoPantalla = PANTALLA_NADA;
 
     while (1) {
+      
+        if (xQueueReceive(casa->pantallaQueue, &eventoPantalla, 0) == pdTRUE) {
+            if (eventoPantalla == PANTALLA_LIMPIAR_ALARMA) {
+                casa->pantalla.limpiar();
+            }
+            eventoPantalla = PANTALLA_NADA;
+        }
 
         if (casa->alarma.estaActiva()) {
             casa->pantalla.mostrarAlarma(casa->estadoPantalla.alarmaHab);
@@ -255,6 +264,7 @@ void CasaInteligente::TaskLight(void* pv) {
     }
 }
 
+
 // ==================================================
 //               TASK: MOVIMIENTO
 // ==================================================
@@ -294,7 +304,9 @@ void CasaInteligente::TaskAlarm(void* pv) {
     while (1) {
         if (xQueueReceive(casa->botonQueue, &msg, 0) == pdTRUE) {
             casa->alarma.desactivar();
-            casa->pantalla.limpiar();
+
+            int ev = PANTALLA_LIMPIAR_ALARMA;
+            xQueueSend(casa->pantallaQueue, &ev, 0);
         }
 
         casa->alarma.actualizar();

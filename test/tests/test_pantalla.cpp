@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "../test_common.h"
 #include "../mocks/HardwareMock.h"
-#include "../../PantallaLCD.h"
+#include "../../include/PantallaLCD.h"
 
 class PantallaLCDTest : public ::testing::Test {
 protected:

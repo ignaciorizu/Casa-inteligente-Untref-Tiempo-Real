@@ -61,7 +61,7 @@ for comp in "${COMPONENTS[@]}"; do
     check_file "./include/${comp}.h" || exit 1
 done
 
-check_file "./IRCodes.h" || exit 1
+check_file "./include/IRCodes.h" || exit 1
 check_file "./test/mocks.cpp" || exit 1
 
 # Limpiar compilaciones anteriores

@@ -1,4 +1,4 @@
-#include "SensorMovimiento.h"
+#include "../include/SensorMovimiento.h"
 
 SensorMovimiento::SensorMovimiento(int pinPIR)
     : pin(pinPIR) {

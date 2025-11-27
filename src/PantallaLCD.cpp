@@ -1,4 +1,4 @@
-#include "PantallaLCD.h"
+#include "../include/PantallaLCD.h"
 
 PantallaLCD::PantallaLCD(uint8_t address, uint8_t cols, uint8_t rows)
     : lcd(address, cols, rows) {}

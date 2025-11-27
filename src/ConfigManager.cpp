@@ -1,4 +1,4 @@
-#include "ConfigManager.h"
+#include "../include/ConfigManager.h"
 
 ConfigManager::ConfigManager() {}
 

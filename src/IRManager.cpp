@@ -1,4 +1,4 @@
-#include "IRManager.h"
+#include "../include/IRManager.h"
 #include <IRremote.h>
 
 IRManager::IRManager(uint8_t recvPin)

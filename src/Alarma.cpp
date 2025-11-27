@@ -1,4 +1,4 @@
-#include "Alarma.h"
+#include "../include/Alarma.h"
 
 Alarma::Alarma(int speaker, int led)
     : pinSpeaker(speaker), pinLed(led), activa(false)

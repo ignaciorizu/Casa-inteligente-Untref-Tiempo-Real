@@ -1,4 +1,4 @@
-#include "SensorTemperatura.h"
+#include "../include/SensorTemperatura.h"
 
 #ifdef UNIT_TEST
     #include <cmath> // Para std::isnan

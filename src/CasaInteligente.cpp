@@ -1,4 +1,4 @@
-#include "CasaInteligente.h"
+#include "../include/CasaInteligente.h"
 
 // ====== ASIGNACIÓN DE PINES ======
 

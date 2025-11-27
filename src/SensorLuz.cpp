@@ -1,4 +1,4 @@
-#include "SensorLuz.h"
+#include "../include/SensorLuz.h"
 
 #ifdef UNIT_TEST
     #include <cmath>

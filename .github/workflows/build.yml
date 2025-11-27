@@ -1,0 +1,39 @@
+name: Build ESP32 Firmware
+
+on:
+  push:             # Ejecuta en cada commit
+    branches:
+      - "**"       # Todas las ramas
+  pull_request:
+
+permissions:
+  contents: write   # Permite guardar cambios si quisieras releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build firmware
+        run: |
+          pio run
+
+      - name: Create firmware directory
+        run: mkdir -p firmware
+
+      - name: Copy firmware files
+        run: |
+          cp .pio/build/**/firmware.bin firmware/firmware.bin
+          cp .pio/build/**/firmware.elf firmware/firmware.elf
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: firmware/

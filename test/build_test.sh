@@ -57,8 +57,8 @@ check_file() {
 # Verificar archivos necesarios
 print_step "Verificando archivos..."
 for comp in "${COMPONENTS[@]}"; do
-    check_file "./${comp}.cpp" || exit 1
-    check_file "./${comp}.h" || exit 1
+    check_file "./src/${comp}.cpp" || exit 1
+    check_file "./include/${comp}.h" || exit 1
 done
 
 check_file "./IRCodes.h" || exit 1

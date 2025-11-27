@@ -82,7 +82,7 @@ echo "✅ Mocks compilados"
 OBJECT_FILES="mocks.o"
 for comp in "${COMPONENTS[@]}"; do
     print_step "Compilando $comp..."
-    $CXX $CXXFLAGS $INCLUDES -c "./${comp}.cpp" -o "${comp}.o"
+    $CXX $CXXFLAGS $INCLUDES -c "./src/${comp}.cpp" -o "${comp}.o"
     if [ $? -ne 0 ]; then
         echo "❌ Error compilando $comp"
         exit 1

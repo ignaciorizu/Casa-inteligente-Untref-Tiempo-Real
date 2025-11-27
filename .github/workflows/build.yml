@@ -1,13 +1,13 @@
 name: Build ESP32 Firmware
 
 on:
-  push:             # Ejecuta en cada commit
+  push:
     branches:
-      - "**"       # Todas las ramas
+      - "**"
   pull_request:
 
 permissions:
-  contents: write   # Permite guardar cambios si quisieras releases
+  contents: write
 
 jobs:
   build:
@@ -15,24 +15,27 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
       - name: Install PlatformIO
         run: pip install platformio
 
-      - name: Build firmware
+      - name: Build firmware (PlatformIO)
+        run: pio run
+
+      # Opcional: ver qué quedó en el repo luego del build
+      - name: List firmware directory
         run: |
-          pio run
+          ls -R
+          echo "Contenido de firmware/:"
+          ls -R firmware || echo "No se encontró la carpeta firmware"
 
-      - name: Create firmware directory
-        run: mkdir -p firmware
-
-      - name: Copy firmware files
-        run: |
-          cp .pio/build/**/firmware.bin firmware/firmware.bin
-          cp .pio/build/**/firmware.elf firmware/firmware.elf
-
-      - name: Upload build artifacts
+      - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
           name: firmware

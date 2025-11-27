@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CasaInteligente.h"
+#include "../include/CasaInteligente.h"
 
 CasaInteligente casa;
 

@@ -2,9 +2,9 @@
 #include "../test_common.h"
 #include "../mocks/ArduinoMock.h"
 #include "../mocks/HardwareMock.h"
-#include "../../SensorTemperatura.h"
-#include "../../SensorLuz.h"
-#include "../../SensorMovimiento.h"
+#include "../../include/SensorTemperatura.h"
+#include "../../include/SensorLuz.h"
+#include "../../include/SensorMovimiento.h"
 
 class SensorTest : public ::testing::Test {
 protected:

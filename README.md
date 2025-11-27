@@ -1,140 +1,144 @@
 # Casa Inteligente - CPS con FreeRTOS
 
-Este proyecto implementa un sistema ciberfísico (CPS) que simula el funcionamiento de una casa inteligente utilizando un ESP32 con FreeRTOS. El sistema integra sensores físicos, actuadores y una interfaz de usuario para configurar parámetros de funcionamiento.
+Este proyecto implementa un sistema ciberfísico (CPS) que simula el funcionamiento de una casa inteligente utilizando un ESP32 con FreeRTOS. El sistema integra sensores, actuadores, control por IR, una interfaz LCD, persistencia de configuración y tareas concurrentes.
 
-El proyecto incluye control de temperatura, regulación de iluminación, monitoreo de seguridad con alarma, persistencia de configuración y pruebas automatizadas.
+La versión actual del proyecto soporta ejecución local mediante PlatformIO y también simulación completa dentro de Visual Studio Code utilizando el plugin oficial de Wokwi.
+
+---
+
+## Uso desde Wokwi (VS Code)
+
+El proyecto puede ejecutarse completamente desde el entorno de Wokwi sin necesidad de hardware físico.
+
+Requisitos:
+
+1. Tener instalado el **Wokwi for VS Code**.  
+2. Activar la licencia gratuita dentro del plugin (un clic, sin tarjetas).  
+3. Ejecutar la simulación directamente (RUN) o compilar con `pio run`.
+
+Para mayor detalle sobre la generación del firmware y el flujo completo, consultar el archivo:
+
+```
+firmware/README.md
+```
+
+Versión online del proyecto (vista en el navegador):  
+https://wokwi.com/projects/448016145560939521
 
 ---
 
 ## Objetivo del Sistema
 
-El sistema busca automatizar las siguientes funciones del hogar:
+El sistema automatiza las siguientes funciones del hogar:
 
 | Subsistema    | Función                                          | Sensores                  | Actuadores             |
 | ------------- | ------------------------------------------------ | ------------------------- | ---------------------- |
-| Climatización | Mantener temperatura entre un rango configurable | 3 sensores de temperatura | Termostato             |
-| Iluminación   | Activar luz según el nivel lumínico del ambiente | 3 sensores de luz         | Lámparas               |
-| Seguridad     | Detectar intrusos y activar alarma               | 3 sensores de movimiento  | Sirena y LED indicador |
+| Climatización | Mantener temperatura dentro de un rango definido | 3 sensores de temperatura | Termostato             |
+| Iluminación   | Encender luces según nivel lumínico              | 3 sensores de luz         | Lámparas               |
+| Seguridad     | Detectar eventos y activar alarma                 | 3 sensores de movimiento  | Sirena y LED indicador |
 
 ---
 
 ## Funcionamiento General
 
-El sistema utiliza múltiples tareas de FreeRTOS, cada una con una responsabilidad específica:
+Cada funcionalidad del sistema está implementada como una tarea independiente de FreeRTOS:
 
 | Tarea                  | Responsabilidad                                                                 |
 | ---------------------- | ------------------------------------------------------------------------------- |
-| Lectura de sensores    | Obtención de valores de temperatura, luz y movimiento                           |
-| Control del termostato | Ajuste de calefacción según el promedio de temperatura y umbrales configurables |
-| Control de luces       | Activación de iluminación si se detecta poca luz                                |
-| Control de alarma      | Gestión de sirena y señal luminosa ante detección de intrusión                  |
-| Interfaz LCD           | Visualización del estado del sistema, alertas y confirmaciones                  |
-| Control remoto IR      | Interpretación de comandos y configuración de parámetros                        |
+| Lectura de sensores    | Lectura de temperatura, luz y movimiento                                        |
+| Control del termostato | Ajuste automático según umbrales configurables                                  |
+| Control de luces       | Encendido automático basado en intensidad lumínica                              |
+| Control de alarma      | Activación de sirena y LED ante movimiento en modo armado                       |
+| Interfaz LCD           | Visualización de estado del sistema y avisos                                    |
+| Control remoto IR      | Manejo de cambios de parámetros y acciones del usuario                          |
 
 ---
 
 ## Configuración mediante LCD + Control Remoto
 
-El usuario puede modificar parámetros del sistema en tiempo real utilizando un control remoto infrarrojo.
+El usuario puede modificar parámetros del sistema en tiempo real.
 
-### Ingreso al modo de configuración
+Ingreso al menú:
+- Presionar **MENU** en el control remoto.
 
-* Presionar el botón **MENU** del control.
-* La pantalla LCD mostrará el menú de configuración.
+Controles principales:
+- **Arriba/Abajo**: Cambiar valores.
+- **MENU**: Salir del menú sin guardar.
+- **POWER (fuera del menú)**: Reiniciar el sistema y recargar configuración persistida.
 
-### Navegación dentro del menú
+Parámetros configurables:
+- Temperatura mínima
+- Temperatura máxima
+- Umbral de luz
 
-| Botón del Control        | Acción                                                             |
-| ------------------------ | ------------------------------------------------------------------ |
-| **Arriba / Abajo**       | Cambia el valor de la configuración actual                         |
-| **MENU nuevamente**      | Sale del menú sin guardar cambios                                  |
-| **POWER fuera del menú** | Reinicia el sistema (útil para cargar valores guardados en EEPROM) |
-
-### Parámetros configurables
-
-| Parámetro          | Descripción                                   |
-| ------------------ | --------------------------------------------- |
-| Temperatura mínima | Umbral para activar calefacción               |
-| Temperatura máxima | Temperatura límite antes de apagarla          |
-| Umbral de luz      | Nivel mínimo de lux para encender iluminación |
-
-Al finalizar la configuración, los datos son guardados automáticamente y la pantalla muestra un mensaje de confirmación.
+Tras confirmar valores, la configuración se guarda en EEPROM.
 
 ---
 
-## Persistencia de Valores (EEPROM)
+## Persistencia (EEPROM)
 
-El sistema guarda en memoria no volátil los siguientes valores:
+El sistema almacena y carga automáticamente:
+- `tempMin`
+- `tempMax`
+- `umbralLuz`
 
-* `tempMin`
-* `tempMax`
-* `umbralLuz`
-
-Estos se cargan automáticamente al iniciar el sistema.
-Si la EEPROM contiene valores inválidos, el software restaura valores por defecto.
+Si la memoria contiene datos corruptos, se restauran valores por defecto.
 
 ---
 
 ## Subsistema de Seguridad
 
-* La alarma se activa si se detecta movimiento mientras el sistema está en modo armado.
-* La sirena y un LED se encienden hasta que el usuario desactive la alarma.
-* La alarma se desactiva presionando el botón asignado en el control remoto.
-
-Para evitar conflictos de actualización con la pantalla, los mensajes de aviso son manejados únicamente por la tarea del LCD.
+- La alarma se activa ante detección de movimiento si el sistema está armado.
+- Se utilizan una sirena y un LED indicador.
+- La desactivación se hace mediante el botón asignado en el control remoto.
+- Los avisos visuales se gestionan exclusivamente desde la tarea del LCD.
 
 ---
 
 ## Pruebas Unitarias
 
-El proyecto incluye pruebas unitarias con mocks para simular el entorno Arduino.
+El proyecto incluye un entorno de pruebas con mocks que simulan el comportamiento del entorno Arduino.
 
-### Dependencias necesarias
 
-Instalación recomendada (Debian/Ubuntu):
+Ejecución:
 
-```bash
-sudo apt install arduino-cli
-sudo apt install libgtest-dev
 ```
-
-Ejecución de pruebas (según el script incluido):
-
-```bash
 ./build_test.sh
 ```
 
-Los mocks se encuentran en:
+Mocks disponibles en:
 
 ```
 test/mocks/
 ```
 
 ---
+## Integración Continua (CI)
 
-## Integración Continua
+El repositorio incluye un workflow de GitHub Actions que:
 
-El proyecto incluye integración continua con GitHub Actions. La CI ejecuta:
+* Compila el proyecto con PlatformIO
+* Ejecuta las pruebas unitarias
+* Genera los archivos `firmware.bin` y `firmware.elf`
+* Publica estos archivos como artifacts descargables
 
-* Compilación
-* Pruebas unitarias
-* Validación previa a merges
+Al publicar un tag, la CI genera una versión con su propio firmware compilado.
 
 Configuración disponible en:
 
 ```
-.github/workflows/cpp-tests.yml
+.github/workflows/
 ```
-
 ---
 
 ## Funcionalidades Extra Implementadas
 
-| Funcionalidad adicional             | Estado        |
-| ----------------------------------- | ------------- |
-| Persistencia en EEPROM              | Implementada  |
-| Control remoto infrarrojo           | Implementado  |
-| Interfaz gráfica mediante LCD       | Implementada  |
-| Modificación dinámica de parámetros | Implementada  |
-| Pruebas unitarias con mocks         | Implementadas |
-| Integración continua                | Implementada  |
+| Funcionalidad adicional        | Estado        |
+| ------------------------------ | ------------- |
+| Persistencia en EEPROM         | Implementada  |
+| Control remoto por IR          | Implementada  |
+| Interfaz LCD                   | Implementada  |
+| Menú configurable              | Implementada  |
+| Pruebas unitarias con mocks    | Implementadas |
+| Integración continua           | Implementada  |
+| Simulación con Wokwi (VS Code) | Implementada  |

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "../test_common.h"
 #include "../mocks/ArduinoMock.h"
-#include "../../Alarma.h"
+#include "../../include/Alarma.h"
 
 class AlarmaTest : public ::testing::Test {
 protected:

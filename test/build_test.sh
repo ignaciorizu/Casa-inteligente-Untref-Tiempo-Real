@@ -57,11 +57,11 @@ check_file() {
 # Verificar archivos necesarios
 print_step "Verificando archivos..."
 for comp in "${COMPONENTS[@]}"; do
-    check_file "./${comp}.cpp" || exit 1
-    check_file "./${comp}.h" || exit 1
+    check_file "./src/${comp}.cpp" || exit 1
+    check_file "./include/${comp}.h" || exit 1
 done
 
-check_file "./IRCodes.h" || exit 1
+check_file "./include/IRCodes.h" || exit 1
 check_file "./test/mocks.cpp" || exit 1
 
 # Limpiar compilaciones anteriores
@@ -82,7 +82,7 @@ echo "✅ Mocks compilados"
 OBJECT_FILES="mocks.o"
 for comp in "${COMPONENTS[@]}"; do
     print_step "Compilando $comp..."
-    $CXX $CXXFLAGS $INCLUDES -c "./${comp}.cpp" -o "${comp}.o"
+    $CXX $CXXFLAGS $INCLUDES -c "./src/${comp}.cpp" -o "${comp}.o"
     if [ $? -ne 0 ]; then
         echo "❌ Error compilando $comp"
         exit 1

@@ -4,9 +4,10 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - feature/ci-testing
   workflow_dispatch:
+
+permissions:
+  contents: write   # <= HABILITA CREAR RELEASES
 
 jobs:
   build:
